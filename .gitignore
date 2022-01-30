@@ -1,0 +1,8 @@
+dist
+node_modules
+target
+.cache
+.DS_Store
+*.log
+firebase.config.dev.json
+public
