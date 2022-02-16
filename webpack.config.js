@@ -1,7 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
-const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
 
 const BUILD_MODE = "BUILD_MODE";
 const release = !["dev"].includes(process.env[BUILD_MODE]);
@@ -70,7 +69,7 @@ module.exports = {
         }),
         new webpack.EnvironmentPlugin({
             [BUILD_MODE]: null,
-            FIREBASE_CONFIG: release ? false : JSON.stringify(require("./firebase.config.dev.json"))
+            FIREBASE_CONFIG: JSON.stringify(require("./firebase.config.dev.json"))
         })
     ],
     performance: {

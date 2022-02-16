@@ -1,4 +1,5 @@
 import "./assets/favicon.png"
+import "./assets/reset.scss"
 import "./assets/style.scss"
 const wasmPromise = import("./dist/app");
 

@@ -1,11 +1,18 @@
+use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use wasm_bindgen::prelude::*;
-
-mod routing;
+mod admin;
+mod compornents;
 mod pages;
+mod routing;
 
-use pages::{blog::Blog, home::Home, notfound::NotFound};
+use admin::{
+    admin::Admin, admin_article_edit::AdminArticleEdit, admin_blog::AdminBlog,
+    admin_work::AdminWork,
+};
+use pages::{
+    blog::Blog, home::Home, notfound::NotFound, profile::Profile, view::View, works::Works,
+};
 use routing::AppRoute;
 
 #[function_component(Main)]
@@ -18,10 +25,16 @@ fn app() -> Html {
 }
 
 fn switch(routes: &AppRoute) -> Html {
-    log::info!("{:?}", "tst");
     match routes {
         AppRoute::Home => html! { <Home /> },
         AppRoute::Blog => html! { <Blog /> },
+        AppRoute::View { id } => html! { <View id={id.to_string()}/> },
+        AppRoute::AdminBlog => html! { <AdminBlog/> },
+        AppRoute::AdminWork => html! { <AdminWork /> },
+        AppRoute::AdminArticleEdit => html! { <AdminArticleEdit /> },
+        AppRoute::Profile => html! { <Profile /> },
+        AppRoute::Works => html! { <Works /> },
+        AppRoute::Admin => html! { <Admin /> },
         AppRoute::NotFound => html! { <NotFound /> },
     }
 }

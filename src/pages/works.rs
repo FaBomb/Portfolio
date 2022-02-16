@@ -3,17 +3,16 @@ use crate::routing::AppRoute;
 use yew::{function_component, html, Callback};
 use yew_router::prelude::*;
 
-#[function_component(Home)]
-pub fn home() -> Html {
+#[function_component(Works)]
+pub fn works() -> Html {
     let history = use_history().unwrap();
 
-    let onclick_callback = Callback::from(move |_| history.push(AppRoute::Blog));
-
+    let onclick_callback = Callback::from(move |_| history.push(AppRoute::Home));
     html! {
         <>
             <Header/>
-            <h1>{ "Home" }</h1>
-            <button onclick={onclick_callback}>{ "Go Blog" }</button>
+            <h1>{ "Works" }</h1>
+            <button onclick={onclick_callback}>{ "Go Home" }</button>
             <Footer/>
         </>
     }

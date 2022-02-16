@@ -1,6 +1,7 @@
+use crate::compornents::{footer::Footer, header::Header};
+use crate::routing::AppRoute;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::{routing::AppRoute};
 
 #[function_component(NotFound)]
 pub fn notfound() -> Html {
@@ -8,9 +9,11 @@ pub fn notfound() -> Html {
 
     let onclick_callback = Callback::from(move |_| history.push(AppRoute::Home));
     html! {
-        <div>
+        <>
+            <Header/>
             <h1>{ "404エラー" }</h1>
             <button onclick={onclick_callback}>{ "Go Home" }</button>
-        </div>
+            <Footer/>
+        </>
     }
 }
