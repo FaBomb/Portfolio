@@ -1,14 +1,191 @@
 @import url(https://fonts.googleapis.com/css?family=Montserrat);
 
+$background:rgb(240, 239, 239);
+$header_color:rgb(82, 82, 82);
+$footer_color:#140361;
+$body_font_color:#333;
+$contrast_font_color:rgb(240, 239, 239);
+
+$header_height: 80px;
+$footer_height: 160px;
+$preview_margin_top: 2.2em;
+$preview_margin_bottom: 2.4rem;
+
 body{
+    min-height: 100vh;
+    position: relative;
+    padding-top: $header_height;
+    padding-bottom: $footer_height;
+    box-sizing: border-box;
+
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     font-family: Montserrat;
-    background: rgb(163, 53, 33);
+    background: $background;
+    color: $body_font_color;
 }
 
-h1{
-    color: white;
+h1 {
+    font-size: 1.8em;
+    font-weight: bold;
+}
+h2 {
+    font-size: 1.6em;
+    font-weight: bold;
+}
+h3 {
+    font-size: 1.4em;
+    font-weight: bold;
+}
+h4, h5 {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+p, ol, li {
+    line-height: 1.9;
+}
+a {
+    color:#4183c4;;
+}
+
+.markdown h1, .markdown h2, .markdown h3, .markdown h4, .markdown h5, 
+.markdown p, .markdown table, .markdown ol, .markdown ul, .markdown pre {
+    margin-top: $preview_margin_top;
+    margin-bottom: $preview_margin_bottom;
+}
+
+header {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    background: $header_color;
+    color: $contrast_font_color;
+    position: absolute;
+    top: 0;
+    height: $header_height;
+    nav {
+        button {
+            text-decoration: none;
+            background-color: $background;
+            border-radius: 5px;
+            color: $body_font_color;
+        }
+    }
+}
+label {
+    padding: 10px 40px;
+    color: #ffffff;
+    background-color: #384878;
+    cursor: pointer;
+}
+
+input[type="file"] {
+    display: none;
+}
+footer {
+    width: 100%;
+    height: $footer_height;
+    position: absolute;
+    bottom: 0;
+    background: $header_color;
+    color: $contrast_font_color;
+}
+
+.markdown {
+    width: 100%;
+    height: calc(90vh - $header_height);
+    padding: 20px 0;
+    display: flex;
+    justify-content: space-around;
+    
+    textarea {
+        border: 1px $body_font_color solid;
+        padding: 24px;
+        width: 48%;
+        outline: none;
+        resize: none;
+    }
+    img, video {
+        max-width: 100%;
+    }
+    blockquote {
+        border-left: 5px solid #ddd;
+        color: #777;
+        padding: 1em;
+        padding-right: 0;
+        margin: 1.5em 0;
+        p {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+    }
+    h1, h2 {
+        border-left: 8px solid rgb(202, 115, 0);
+        border-bottom: 1px solid rgb(202, 115, 0);
+        width: 100%;
+        padding-left: 12px;
+        padding-bottom: 6px;
+    }
+    table {
+        margin-left: auto;
+        margin-right: auto;
+        table-layout: fixed;
+        th {
+            background-color: rgb(226, 226, 226);
+        }
+        th, td {
+            border: 1px solid rgb(179, 179, 179);
+            padding: 6px 13px;
+            /*word-break: break-all;*/
+            overflow-wrap : break-word;
+        }
+    }
+    pre {
+        background-color: #364549;
+        color: $contrast_font_color;
+        padding: 16px;
+    }
+    hr {
+        height: 5px;
+        background-color: rgb(179, 179, 179);
+        width: 100%;
+        border: none;
+    }
+    ol, ul {
+        counter-reset: item;
+        font-size: 1.2em;
+        ol, p {
+            padding-left: 1em;
+            margin-top: 0;
+            margin-bottom: 0;
+            font-size: 1em;
+        }
+    }
+    li {
+        text-indent: -1.3em;
+        padding-left: 1.3em;
+    }
+    li:before {
+        counter-increment: item;
+        content: counter(item)'.';
+        padding-right: .5em;
+        font-weight: bold;
+        color: $footer_color;
+    }
+    .preview {
+        border: 1px $body_font_color solid;
+        width: 48%;
+        padding: 0px 24px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+.view {
+    flex-direction: column;
+    color:red;
+    height: auto;
 }
