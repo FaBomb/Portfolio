@@ -94,27 +94,69 @@ export const fetch_tags = async():Promise<string> => {
     return tags_json;
 }
 
-export const fetch_article_id = async(collect:string, lastId: string):Promise<string> => {
-    const limit_num: number = 2;
-    const article_ids:Array<string> = [];
-
-    const lastDocRef = doc(store, collect, lastId);
-    const q = query(collection(store, collect), orderBy("created_at", "desc"),
-                    endAt(), limit(limit_num) );
-
-    await getDocs(q).then((snapshot) => {
-        console.log(snapshot);
-        snapshot.docs.forEach(doc => {
-            article_ids.push(doc.id);
-        })
-    }).catch((error) => {
-        console.error("fetch_article_id is error", error);
-    });
-    const article_ids_json = JSON.stringify(article_ids);
-    return article_ids_json;
+export const fetch_article_size = async(collect:string):Promise<number> => {
+    let article_size: number = 0; 
+    await getDocs(collection(store, collect)).then((snapshot) => {
+        article_size = snapshot.size;
+    }).catch((e) => {
+        console.error(e);
+    })
+    return article_size;
 }
 
-export const fetch_article_contents = async(collect:string, id: string):Promise<string> => {
+export const fetch_article_contents = async(collect:string, index: number, limit_num: number):Promise<string> => {
+    const start_index: number = limit_num * (index - 1);
+    const articles: Array<Article> = [];
+    interface Article{
+        id: string,
+        content: string,
+        tags: Array<string>,
+        category: string,
+        released: boolean,
+        title: string,
+        thumbnail: string,
+        images: Array<string>,
+        updated_at: string,
+    }
+
+    const first = query(collection(store, collect), orderBy("created_at", "desc"),
+                        limit(start_index + 1));
+    const documentSnapshots = await getDocs(first);
+    const lastVisible = documentSnapshots.docs[documentSnapshots.docs.length-1];
+
+    const q = query(collection(store, collect), orderBy("created_at", "desc"),
+                    startAt(lastVisible), limit(limit_num) );
+
+    await getDocs(q).then((snapshot) => {
+        snapshot.docs.forEach(doc => {
+            const data = doc.data({ serverTimestamps: "estimate" });
+            if (data) {
+                const year = data.updated_at.toDate().getFullYear();
+                const month = data.updated_at.toDate().getMonth()+1;
+                const date = data.updated_at.toDate().getDate();
+                const article: Article = {
+                    id: doc.id,
+                    content: data.article.content,
+                    tags: data.article.tags,
+                    category: data.article.category,
+                    released: data.article.released,
+                    title: data.article.title,
+                    thumbnail: data.article.thumbnail,
+                    images: data.article.images,
+                    updated_at: [year, month, date].join("."),
+                }
+                articles.push(article);
+            }
+
+        })
+    }).catch((error) => {
+        console.error("fetch_article_contents is error", error);
+    });
+    const article_contents_json = JSON.stringify(articles);
+    return article_contents_json;
+}
+
+export const fetch_article_content_from_id = async(collect:string, id: string):Promise<string> => {
     let article;
     await getDoc(doc(store, collect, id)).then((snapshot) => {
         const data = snapshot.data({ serverTimestamps: "estimate" });

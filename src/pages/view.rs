@@ -1,7 +1,7 @@
 use crate::admin::admin_article_edit::markdown;
 use crate::compornents::{footer::Footer, header::Header};
 use crate::routing::AppRoute;
-use js_bridge::fetch_article_contents;
+use js_bridge::fetch_article_content_from_id;
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
 use wasm_bindgen_futures::spawn_local;
@@ -46,9 +46,10 @@ pub fn view(props: &RenderedAtProps) -> Html {
             move |_| {
                 let article = article.clone();
                 spawn_local(async move {
-                    let article_content_value = fetch_article_contents("blog".to_string(), id)
-                        .await
-                        .as_string();
+                    let article_content_value =
+                        fetch_article_content_from_id("blog".to_string(), id)
+                            .await
+                            .as_string();
                     match article_content_value {
                         Some(article_content) => {
                             let article_result: Result<Article> =

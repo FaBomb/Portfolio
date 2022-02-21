@@ -31,11 +31,14 @@ extern "C" {
     #[wasm_bindgen(js_name = "fetch_categories", js_namespace = ["window", "_wasm_js_bridge"])]
     pub async fn fetch_categories() -> JsValue;
 
-    #[wasm_bindgen(js_name = "fetch_article_id", js_namespace = ["window", "_wasm_js_bridge"])]
-    pub async fn fetch_article_id(collection: String, id: String) -> JsValue;
-
     #[wasm_bindgen(js_name = "fetch_article_contents", js_namespace = ["window", "_wasm_js_bridge"])]
-    pub async fn fetch_article_contents(collection: String, id: String) -> JsValue;
+    pub async fn fetch_article_contents(collection: String, index: u8, limit_num: u8) -> JsValue;
+
+    #[wasm_bindgen(js_name = "fetch_article_size", js_namespace = ["window", "_wasm_js_bridge"])]
+    pub async fn fetch_article_size(collection: String) -> JsValue;
+
+    #[wasm_bindgen(js_name = "fetch_article_content_from_id", js_namespace = ["window", "_wasm_js_bridge"])]
+    pub async fn fetch_article_content_from_id(collection: String, id: String) -> JsValue;
 
     #[wasm_bindgen(js_name = "fetch_tags", js_namespace = ["window", "_wasm_js_bridge"])]
     pub async fn fetch_tags() -> JsValue;
