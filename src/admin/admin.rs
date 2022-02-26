@@ -1,5 +1,5 @@
 use crate::compornents::{footer::Footer, header::Header};
-use crate::routing::AppRoute;
+use crate::routing::{AdminBlogRoute, AppRoute};
 use js_bridge::{is_signed_in, sign_in};
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlInputElement;
@@ -29,7 +29,7 @@ pub fn admin() -> Html {
                         if result.as_bool().unwrap() {
                             is_signed.set(!*is_signed);
                             log::info!("sign in");
-                            history.push(AppRoute::AdminBlog);
+                            history.push(AdminBlogRoute::AdminBlog);
                         }
                     });
                 }
@@ -46,7 +46,7 @@ pub fn admin() -> Html {
                     let result = is_signed_in("_").await.as_bool().unwrap();
                     is_signed.set(result);
                     if result {
-                        history.push(AppRoute::AdminBlog);
+                        history.push(AdminBlogRoute::AdminBlog);
                     }
                 });
                 || ()

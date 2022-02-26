@@ -25,7 +25,7 @@
   "scripts": {
     "dev": "wasm-pack build --out-dir dist --dev --out-name app && BUILD_MODE=dev webpack",
     "build": "wasm-pack build --release --out-dir dist --out-name app && webpack",
-    "serve": "wasm-pack build --out-dir dist --dev --out-name app && BUILD_MODE=dev webpack && serve -s -p 8080 public"
+    "serve": "wasm-pack build --dev --out-dir dist --out-name app && BUILD_MODE=dev webpack && serve -s -p 8080 public"
   },
   "name": "folio",
   "description": "this web site is FaBomb's portfolio site. I will publish my works and blog posts.",
