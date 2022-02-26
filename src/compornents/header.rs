@@ -1,4 +1,4 @@
-use crate::routing::AppRoute;
+use crate::routing::{AdminBlogRoute, AppRoute};
 use js_bridge::{is_signed_in, sign_out};
 use wasm_bindgen_futures::spawn_local;
 use yew::{function_component, html, use_effect_with_deps, use_state, Callback};
@@ -15,7 +15,7 @@ pub fn header() -> Html {
     let history = use_history().unwrap();
     let go_works = Callback::from(move |_| history.push(AppRoute::Works));
     let history = use_history().unwrap();
-    let go_admin_blog = Callback::from(move |_| history.push(AppRoute::AdminBlog));
+    let go_admin_blog = Callback::from(move |_| history.push(AdminBlogRoute::AdminBlog));
     let history = use_history().unwrap();
     let go_admin_work = Callback::from(move |_| history.push(AppRoute::AdminWork));
     let history = use_history().unwrap();

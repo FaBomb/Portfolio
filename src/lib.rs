@@ -13,7 +13,7 @@ use admin::{
 use pages::{
     blog::Blog, home::Home, notfound::NotFound, profile::Profile, view::View, works::Works,
 };
-use routing::AppRoute;
+use routing::{AdminBlogRoute, AppRoute};
 
 #[function_component(Main)]
 fn app() -> Html {
@@ -29,13 +29,24 @@ fn switch(routes: &AppRoute) -> Html {
         AppRoute::Home => html! { <Home /> },
         AppRoute::Blog => html! { <Blog /> },
         AppRoute::View { id } => html! { <View id={id.to_string()}/> },
-        AppRoute::AdminBlog => html! { <AdminBlog/> },
+        AppRoute::AdminBlogPage => {
+            html! { <Switch<AdminBlogRoute> render={Switch::render(switch_admin_blog)} /> }
+        }
         AppRoute::AdminWork => html! { <AdminWork /> },
         AppRoute::AdminArticleEdit => html! { <AdminArticleEdit /> },
         AppRoute::Profile => html! { <Profile /> },
         AppRoute::Works => html! { <Works /> },
         AppRoute::Admin => html! { <Admin /> },
         AppRoute::NotFound => html! { <NotFound /> },
+    }
+}
+
+fn switch_admin_blog(route: &AdminBlogRoute) -> Html {
+    match route {
+        AdminBlogRoute::AdminBlog => html! {<h1>{"Profile"}</h1>},
+        AdminBlogRoute::NotFound => html! {
+            <Redirect<AppRoute> to={AppRoute::NotFound}/>
+        },
     }
 }
 
@@ -47,10 +58,6 @@ pub fn start(mode: AppMode) {
     };
     wasm_logger::init(wasm_logger::Config::new(log_level));
     yew::start_app::<Main>();
-}
-
-pub fn main() {
-    panic!()
 }
 
 #[wasm_bindgen]
