@@ -1,5 +1,5 @@
 use crate::compornents::{footer::Footer, header::Header};
-use crate::routing::AppRoute;
+use crate::routing::BlogRoute;
 use yew::{function_component, html, Callback};
 use yew_router::prelude::*;
 
@@ -7,7 +7,11 @@ use yew_router::prelude::*;
 pub fn home() -> Html {
     let history = use_history().unwrap();
 
-    let onclick_callback = Callback::from(move |_| history.push(AppRoute::Blog));
+    let onclick_callback = Callback::from(move |_| {
+        history.push(BlogRoute::Blog {
+            page: "1".to_string(),
+        })
+    });
 
     html! {
         <>

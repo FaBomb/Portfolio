@@ -4,31 +4,43 @@ use yew_router::prelude::*;
 pub enum AppRoute {
     #[at("/")]
     Home,
-    #[at("/blog")]
-    Blog,
-    #[at("/admin_blog/:s")]
-    AdminBlogPage,
+    #[at("/admin/:s")]
+    AdminPage,
+    #[at("/blog/:s")]
+    BlogPage,
+    #[at("/work/:s")]
+    WorkPage,
     #[at("view/:id")]
     View { id: String },
-    #[at("/admin_work")]
-    AdminWork,
-    #[at("/admin_article_edit")]
-    AdminArticleEdit,
-    #[at("/works")]
-    Works,
     #[at("/profile")]
     Profile,
-    #[at("/admin")]
-    Admin,
     #[not_found]
     #[at("/404")]
     NotFound,
 }
 #[derive(Clone, Routable, PartialEq)]
-pub enum AdminBlogRoute {
-    #[at("/admin_blog/")]
-    AdminBlog,
+pub enum AdminRoute {
+    #[at("/admin/entrance")]
+    Admin,
+    #[at("/admin/article_edit")]
+    AdminArticleEdit,
     #[not_found]
-    #[at("/admin_blog/404")]
+    #[at("/admin/404")]
+    NotFound,
+}
+#[derive(Clone, Routable, PartialEq)]
+pub enum BlogRoute {
+    #[at("/blog/:page")]
+    Blog { page: String },
+    #[not_found]
+    #[at("/blog/404")]
+    NotFound,
+}
+#[derive(Clone, Routable, PartialEq)]
+pub enum WorkRoute {
+    #[at("/work/:page")]
+    Work { page: String },
+    #[not_found]
+    #[at("/work/404")]
     NotFound,
 }

@@ -6,14 +6,9 @@ mod compornents;
 mod pages;
 mod routing;
 
-use admin::{
-    admin::Admin, admin_article_edit::AdminArticleEdit, admin_blog::AdminBlog,
-    admin_work::AdminWork,
-};
-use pages::{
-    blog::Blog, home::Home, notfound::NotFound, profile::Profile, view::View, works::Works,
-};
-use routing::{AdminBlogRoute, AppRoute};
+use admin::{admin::Admin, admin_article_edit::AdminArticleEdit};
+use pages::{article::Article, home::Home, notfound::NotFound, profile::Profile, view::View};
+use routing::{AdminRoute, AppRoute, BlogRoute, WorkRoute};
 
 #[function_component(Main)]
 fn app() -> Html {
@@ -27,24 +22,46 @@ fn app() -> Html {
 fn switch(routes: &AppRoute) -> Html {
     match routes {
         AppRoute::Home => html! { <Home /> },
-        AppRoute::Blog => html! { <Blog /> },
         AppRoute::View { id } => html! { <View id={id.to_string()}/> },
-        AppRoute::AdminBlogPage => {
-            html! { <Switch<AdminBlogRoute> render={Switch::render(switch_admin_blog)} /> }
+        AppRoute::AdminPage => {
+            html! { <Switch<AdminRoute> render={Switch::render(switch_admin)} /> }
         }
-        AppRoute::AdminWork => html! { <AdminWork /> },
-        AppRoute::AdminArticleEdit => html! { <AdminArticleEdit /> },
+        AppRoute::BlogPage => {
+            html! { <Switch<BlogRoute> render={Switch::render(switch_blog)} /> }
+        }
+        AppRoute::WorkPage => {
+            html! { <Switch<WorkRoute> render={Switch::render(switch_work)} /> }
+        }
         AppRoute::Profile => html! { <Profile /> },
-        AppRoute::Works => html! { <Works /> },
-        AppRoute::Admin => html! { <Admin /> },
         AppRoute::NotFound => html! { <NotFound /> },
     }
 }
 
-fn switch_admin_blog(route: &AdminBlogRoute) -> Html {
+fn switch_admin(route: &AdminRoute) -> Html {
     match route {
-        AdminBlogRoute::AdminBlog => html! {<h1>{"Profile"}</h1>},
-        AdminBlogRoute::NotFound => html! {
+        AdminRoute::Admin => html! { <Admin /> },
+        AdminRoute::AdminArticleEdit => html! { <AdminArticleEdit /> },
+        AdminRoute::NotFound => html! {
+            <Redirect<AppRoute> to={AppRoute::NotFound}/>
+        },
+    }
+}
+fn switch_blog(route: &BlogRoute) -> Html {
+    match route {
+        BlogRoute::Blog { page } => {
+            html! {<Article page={page.to_string()} article_type={"blog".to_string()}/>}
+        }
+        BlogRoute::NotFound => html! {
+            <Redirect<AppRoute> to={AppRoute::NotFound}/>
+        },
+    }
+}
+fn switch_work(route: &WorkRoute) -> Html {
+    match route {
+        WorkRoute::Work { page } => {
+            html! {<Article page={page.to_string()} article_type={"work".to_string()}/>}
+        }
+        WorkRoute::NotFound => html! {
             <Redirect<AppRoute> to={AppRoute::NotFound}/>
         },
     }

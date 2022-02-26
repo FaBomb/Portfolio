@@ -1,5 +1,5 @@
 use crate::compornents::{footer::Footer, header::Header};
-use crate::routing::AppRoute;
+use crate::routing::AdminRoute;
 use js_bridge::{
     del_category, del_tag, fetch_categories, fetch_tags, is_signed_in, set_category, set_content,
     set_tag, upload,
@@ -98,7 +98,7 @@ pub fn admin_article_edit() -> Html {
                     let result = is_signed_in("_").await.as_bool().unwrap();
                     is_signed.set(result);
                     if !result {
-                        history.push(AppRoute::Admin);
+                        history.push(AdminRoute::Admin);
                     }
 
                     let categories_value = fetch_categories().await.as_string().unwrap();
