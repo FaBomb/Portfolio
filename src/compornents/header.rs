@@ -1,4 +1,4 @@
-use crate::routing::{AdminBlogRoute, AppRoute};
+use crate::routing::{AdminRoute, AppRoute, BlogRoute, WorkRoute};
 use js_bridge::{is_signed_in, sign_out};
 use wasm_bindgen_futures::spawn_local;
 use yew::{function_component, html, use_effect_with_deps, use_state, Callback};
@@ -9,20 +9,36 @@ pub fn header() -> Html {
     let is_signed = use_state(|| false);
 
     let history = use_history().unwrap();
-    let go_blog = Callback::from(move |_| history.push(AppRoute::Blog));
-    let history = use_history().unwrap();
     let go_home = Callback::from(move |_| history.push(AppRoute::Home));
     let history = use_history().unwrap();
-    let go_works = Callback::from(move |_| history.push(AppRoute::Works));
+    let go_blog = Callback::from(move |_| {
+        history.push(BlogRoute::Blog {
+            page: "1".to_string(),
+        })
+    });
     let history = use_history().unwrap();
-    let go_admin_blog = Callback::from(move |_| history.push(AdminBlogRoute::AdminBlog));
+    let go_work = Callback::from(move |_| {
+        history.push(WorkRoute::Work {
+            page: "1".to_string(),
+        })
+    });
     let history = use_history().unwrap();
-    let go_admin_work = Callback::from(move |_| history.push(AppRoute::AdminWork));
-    let history = use_history().unwrap();
-    let go_article_edit = Callback::from(move |_| history.push(AppRoute::AdminArticleEdit));
+    let go_article_edit = Callback::from(move |_| history.push(AdminRoute::AdminArticleEdit));
 
     let history = use_history().unwrap();
-    let current_path_name = history.location().pathname();
+
+    let path_name = history.location().pathname();
+    let path_name_vec: Vec<&str> = path_name.split('/').collect();
+    let some_path_name = path_name_vec.get(1);
+    let some_admin_path_name = path_name_vec.get(2);
+    let current_path_name = match some_path_name {
+        Some(path) => path,
+        None => "",
+    };
+    let current_admin_path_name = match some_admin_path_name {
+        Some(path) => path,
+        None => "",
+    };
 
     let onclick_sign_out = {
         let is_signed = is_signed.clone();
@@ -35,7 +51,7 @@ pub fn header() -> Html {
                 if result.as_bool().unwrap() {
                     is_signed.set(!*is_signed);
                     log::info!("sign out");
-                    history.push(AppRoute::Admin);
+                    history.push(AdminRoute::Admin);
                 }
             });
         }
@@ -60,34 +76,32 @@ pub fn header() -> Html {
         <header>
             <h2>{ "Header" }</h2>
             <nav>
-                if current_path_name == "/admin_blog" {
-                    <button onclick={onclick_sign_out}>{ "SignOut" }</button>
-                    <button onclick={go_article_edit}>{ "ArticleEdit" }</button>
-                    <button onclick={go_admin_work}>{ "AdminWork" }</button>
-                } else if current_path_name == "/admin_article_edit" {
-                    <button onclick={onclick_sign_out}>{ "SignOut" }</button>
-                    <button onclick={go_admin_blog}>{ "AdminBlog" }</button>
-                    <button onclick={go_admin_work}>{ "AdminWork" }</button>
-                } else if current_path_name == "/admin_work" {
-                    <button onclick={onclick_sign_out}>{ "SignOut" }</button>
-                    <button onclick={go_admin_blog}>{ "AdminBlog" }</button>
-                } else if current_path_name == "/" {
+                if current_path_name == "" {
                     <button onclick={go_blog}>{ "Blog" }</button>
-                    <button onclick={go_works}>{ "Works" }</button>
-                } else if current_path_name == "/blog" {
+                    <button onclick={go_work}>{ "Work" }</button>
+                } else if current_path_name == "blog" {
                     <button onclick={go_home}>{ "Home" }</button>
-                    <button onclick={go_works}>{ "Works" }</button>
-                } else if current_path_name == "/works" {
+                    <button onclick={go_work}>{ "Work" }</button>
+                    if *is_signed {
+                        <button onclick={onclick_sign_out}>{ "SignOut" }</button>
+                        <button onclick={go_article_edit}>{ "ArticleEdit" }</button>
+                    }
+                } else if current_path_name == "work" {
                     <button onclick={go_home}>{ "Home" }</button>
                     <button onclick={go_blog}>{ "Blog" }</button>
-                } else if *is_signed {
-                    <button onclick={go_article_edit}>{ "ArticleEdit" }</button>
-                    <button onclick={go_admin_blog}>{ "AdminBlog" }</button>
-                    <button onclick={go_admin_work}>{ "AdminWork" }</button>
+                    if *is_signed {
+                        <button onclick={onclick_sign_out}>{ "SignOut" }</button>
+                        <button onclick={go_article_edit}>{ "ArticleEdit" }</button>
+                    }
+                } else if current_admin_path_name == "article_edit" {
+                    <button onclick={go_home}>{ "Home" }</button>
+                    <button onclick={go_blog}>{ "Blog" }</button>
+                    <button onclick={go_work}>{ "Work" }</button>
+                    <button onclick={onclick_sign_out}>{ "SignOut" }</button>
                 } else {
                     <button onclick={go_home}>{ "Home" }</button>
                     <button onclick={go_blog}>{ "Blog" }</button>
-                    <button onclick={go_works}>{ "Works" }</button>
+                    <button onclick={go_work}>{ "Work" }</button>
                 }
             </nav>
         </header>
