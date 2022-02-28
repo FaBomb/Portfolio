@@ -32,6 +32,38 @@ export const set_content = async(collect: string, article: string) => {
     });
 }
 
+export const update_content = async(collect: string, article: string, id: string) => {
+    const json_article = JSON.parse(article);
+    const docData = {
+        article: json_article,
+        updated_at: serverTimestamp(),
+    }
+    const updateRef = doc(store, collect, id);
+    await updateDoc (updateRef, docData).then(() => {
+        adjust_storage(json_article.images);
+        alert("Successful Update");
+    }).catch((error) => {
+        console.error("update_content is error", error);
+    });
+}
+export const update_released = async(collect: string, article: string, id: string) => {
+    const json_article = JSON.parse(article);
+    json_article.released = !json_article.released;
+    const docData = {
+        article: json_article,
+    }
+    const updateRef = doc(store, collect, id);
+    await updateDoc (updateRef, docData).then(() => {
+        if (json_article.released) {
+            alert("Public");
+        } else {
+            alert("Private");
+        }
+    }).catch((error) => {
+        console.error("update_content is error", error);
+    });
+}
+
 export const set_category = async(category: string) => {
     const categoryData = {
         category: category,
@@ -53,16 +85,24 @@ export const set_tag = async(tag: string) => {
     });
 }
 
+export const del_content =async (collect: string, id: string) => {
+    const delRef = doc(store, collect, id);
+    await deleteDoc(delRef).then(() => {
+        alert("Successful Article delete");
+    }).catch((error) => {
+        console.error("del_content is error", error);
+    })
+}
 export const del_category =async (category: string) => {
     await deleteDoc(doc(store, "category", category)).then(() => {
-        console.log(category+"を削除しました")
+        console.log(category+" deleted")
     }).catch((error) => {
         console.error("del_category is error", error);
     })
 }
 export const del_tag =async (tag: string) => {
     await deleteDoc(doc(store, "tag", tag)).then(() => {
-        console.log(tag+"を削除しました")
+        console.log(tag+" deleted")
     }).catch((error) => {
         console.error("del_tag is error", error);
     })

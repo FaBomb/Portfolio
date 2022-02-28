@@ -1,5 +1,5 @@
 use crate::routing::{AdminBlogRoute, AdminWorkRoute, AppRoute};
-use js_bridge::{fetch_article_contents, is_signed_in};
+use js_bridge::{del_content, fetch_article_contents, is_signed_in, update_released};
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
 use wasm_bindgen_futures::spawn_local;
@@ -59,7 +59,9 @@ pub fn card(props: &RenderedAtProps) -> Html {
                     let mut vnode: Vec<VNode> = Vec::new();
 
                     for article_content in article_contents_result.unwrap() {
-                        let article_id = article_content.id;
+                        let article_id = article_content.id.clone();
+                        let article_content_string =
+                            serde_json::to_string(&article_content.clone()).unwrap();
                         let go_view = {
                             let history = history.clone();
                             let article_id = article_id.clone();
@@ -70,6 +72,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
                         };
                         let edit_article = {
                             let history = history.clone();
+                            let article_id = article_id.clone();
                             move |_| {
                                 let article_id = article_id.clone();
                                 let path_name = history.location().pathname();
@@ -88,6 +91,48 @@ pub fn card(props: &RenderedAtProps) -> Html {
                                 }
                             }
                         };
+                        let del_article = {
+                            let history = history.clone();
+                            let article_id = article_id.clone();
+                            move |_| {
+                                let article_id = article_id.clone();
+                                let path_name = history.location().pathname();
+                                spawn_local(async move {
+                                    let path_name_vec: Vec<&str> = path_name.split('/').collect();
+                                    let some_path_name = path_name_vec.get(1);
+                                    let current_path = match some_path_name {
+                                        Some(path) => path,
+                                        None => "",
+                                    };
+                                    del_content(current_path.to_string(), article_id).await;
+                                });
+                            }
+                        };
+
+                        let change_released = {
+                            let history = history.clone();
+                            let article_id = article_id.clone();
+                            let article_content_string = article_content_string.clone();
+                            move |_| {
+                                let article_content_string = article_content_string.clone();
+                                let article_id = article_id.clone();
+                                let path_name = history.location().pathname();
+                                spawn_local(async move {
+                                    let path_name_vec: Vec<&str> = path_name.split('/').collect();
+                                    let some_path_name = path_name_vec.get(1);
+                                    let current_path = match some_path_name {
+                                        Some(path) => path,
+                                        None => "",
+                                    };
+                                    update_released(
+                                        current_path.to_string(),
+                                        article_content_string,
+                                        article_id,
+                                    )
+                                    .await;
+                                });
+                            }
+                        };
 
                         let card = html! {
                             <div class="card" >
@@ -96,8 +141,12 @@ pub fn card(props: &RenderedAtProps) -> Html {
                                 <h1>{article_content.title}</h1>
                                 if result {
                                     <button onclick={edit_article}>{"Edit"}</button>
-                                    // <button onclick={}>{"Delete"}</button>
-                                    // <button onclick={}>{"Public"}</button>
+                                    <button onclick={del_article}>{"Delete"}</button>
+                                    if article_content.released {
+                                        <button onclick={change_released}>{"Public"}</button>
+                                    } else {
+                                        <button onclick={change_released}>{"Private"}</button>
+                                    }
                                 }
                             </div>
                         };
@@ -127,8 +176,11 @@ pub fn card(props: &RenderedAtProps) -> Html {
                 let article_contents_result: Result<Vec<Article>> =
                     serde_json::from_str(&article_contents_value);
                 let mut vnode: Vec<VNode> = Vec::new();
+
                 for article_content in article_contents_result.unwrap() {
-                    let article_id = article_content.id;
+                    let article_id = article_content.id.clone();
+                    let article_content_string =
+                        serde_json::to_string(&article_content.clone()).unwrap();
                     let go_view = {
                         let history = history.clone();
                         let article_id = article_id.clone();
@@ -137,15 +189,81 @@ pub fn card(props: &RenderedAtProps) -> Html {
                             history.push(AppRoute::View { id: article_id });
                         }
                     };
+                    let edit_article = {
+                        let history = history.clone();
+                        let article_id = article_id.clone();
+                        move |_| {
+                            let article_id = article_id.clone();
+                            let path_name = history.location().pathname();
+                            let path_name_vec: Vec<&str> = path_name.split('/').collect();
+                            let some_path_name = path_name_vec.get(1);
+                            let current_path = match some_path_name {
+                                Some(path) => path,
+                                None => "",
+                            };
+                            if current_path == "blog" {
+                                history.push(AdminBlogRoute::AdminArticleEdit { id: article_id });
+                            } else if current_path == "work" {
+                                history.push(AdminWorkRoute::AdminArticleEdit { id: article_id });
+                            }
+                        }
+                    };
+                    let del_article = {
+                        let history = history.clone();
+                        let article_id = article_id.clone();
+                        move |_| {
+                            let article_id = article_id.clone();
+                            let path_name = history.location().pathname();
+                            spawn_local(async move {
+                                let path_name_vec: Vec<&str> = path_name.split('/').collect();
+                                let some_path_name = path_name_vec.get(1);
+                                let current_path = match some_path_name {
+                                    Some(path) => path,
+                                    None => "",
+                                };
+                                del_content(current_path.to_string(), article_id).await;
+                            });
+                        }
+                    };
+
+                    let change_released = {
+                        let history = history.clone();
+                        let article_id = article_id.clone();
+                        let article_content_string = article_content_string.clone();
+                        move |_| {
+                            let article_content_string = article_content_string.clone();
+                            let article_id = article_id.clone();
+                            let path_name = history.location().pathname();
+                            spawn_local(async move {
+                                let path_name_vec: Vec<&str> = path_name.split('/').collect();
+                                let some_path_name = path_name_vec.get(1);
+                                let current_path = match some_path_name {
+                                    Some(path) => path,
+                                    None => "",
+                                };
+                                update_released(
+                                    current_path.to_string(),
+                                    article_content_string,
+                                    article_id,
+                                )
+                                .await;
+                            });
+                        }
+                    };
+
                     let card = html! {
                         <div class="card" >
                             <img onclick={go_view} src={article_content.thumbnail}/>
                             <time>{article_content.updated_at}</time>
                             <h1>{article_content.title}</h1>
                             if *is_signed {
-                                <button>{"Edit"}</button>
-                                <button>{"Delete"}</button>
-                                <button>{"Public"}</button>
+                                <button onclick={edit_article}>{"Edit"}</button>
+                                <button onclick={del_article}>{"Delete"}</button>
+                                if article_content.released {
+                                    <button onclick={change_released}>{"Public"}</button>
+                                } else {
+                                    <button onclick={change_released}>{"Private"}</button>
+                                }
                             }
                         </div>
                     };
