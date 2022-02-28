@@ -2,7 +2,7 @@ use crate::compornents::{footer::Footer, header::Header};
 use crate::routing::AdminRoute;
 use js_bridge::{
     del_category, del_tag, fetch_all_article_content_from_id, fetch_categories, fetch_tags,
-    is_signed_in, set_category, set_content, set_tag, upload,
+    is_signed_in, set_category, set_content, set_tag, update_content, upload,
 };
 use pulldown_cmark::{html as markdown_html, Options, Parser};
 use regex::Regex;
@@ -34,13 +34,21 @@ pub fn markdown(source_text: &str) -> VNode {
     vnode
 }
 
-fn pulldown_options(values: Vec<String>) -> Vec<VNode> {
+fn pulldown_options(values: Vec<String>, selected: Vec<String>) -> Vec<VNode> {
     let mut options = Vec::new();
     for val in values {
-        let pulldown_option = html! {
+        let val = val.clone();
+        if selected.iter().any(|select| select == &val) {
+            let pulldown_option = html! {
+                <option value={val.clone()} selected=true>{val}</option>
+            };
+            options.push(pulldown_option);
+        } else {
+            let pulldown_option = html! {
                 <option value={val.clone()}>{val}</option>
-        };
-        options.push(pulldown_option);
+            };
+            options.push(pulldown_option);
+        }
     }
     options
 }
@@ -84,9 +92,9 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
     };
     let mut article_type = id;
     let id = props.id.clone();
-    if current_path == "admin_work" && id != "new".to_string() {
+    if current_path == "admin_work" {
         article_type = "work".to_string();
-    } else if current_path == "admin_blog" && id != "new".to_string() {
+    } else if current_path == "admin_blog" {
         article_type = "blog".to_string();
     }
 
@@ -99,14 +107,13 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
         .to_string()
     });
 
-    let init_category = use_state(|| "".to_string());
+    let init_category = use_state(|| vec!["".to_string()]);
     let init_tags_val: Vec<String> = Vec::new();
     let init_tags = use_state(|| init_tags_val);
     let categories = use_state(Vec::new);
     let tags = use_state(Vec::new);
 
     let new_category_ref = use_node_ref();
-    let select_article_type_ref = use_node_ref();
     let select_category_ref = use_node_ref();
     let new_tag_ref = use_node_ref();
     let select_tag_ref = use_node_ref();
@@ -116,8 +123,9 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
     let thumbnail_ref = use_node_ref();
 
     let markdown_vnode = markdown(&text);
-    let pulldown_category_option_vnode = pulldown_options(categories.to_vec());
-    let pulldown_tag_option_vnode = pulldown_options(tags.to_vec());
+    let pulldown_category_option_vnode =
+        pulldown_options(categories.to_vec(), init_category.to_vec());
+    let pulldown_tag_option_vnode = pulldown_options(tags.to_vec(), init_tags.to_vec());
     {
         let id = id.clone();
         let title_state = title.clone();
@@ -154,7 +162,7 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
                             let thumbnail = article_result.thumbnail.clone();
                             let title = article_result.title.clone();
                             let content = article_result.content.clone();
-                            init_category.set(category);
+                            init_category.set(vec![category]);
                             init_tags.set(tags);
                             thumbnail_state.set(thumbnail);
                             title_state.set(title);
@@ -255,66 +263,68 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
 
     let post = {
         let select_category_ref = select_category_ref.clone();
-        let select_article_type_ref = select_article_type_ref.clone();
+        let id = id.clone();
+        let article_type = article_type.clone();
         let select_tag_ref = select_tag_ref.clone();
         let title = title.clone();
         let thumbnail = thumbnail.clone();
         let text = text.clone();
         let thumbnail = thumbnail.clone();
         move |_| {
+            let article_type = article_type.clone();
+            let id = id.clone();
             let title = title.clone();
             let thumbnail = thumbnail.clone();
             let text = text.clone();
             let thumbnail = thumbnail.clone();
             if let Some(select_category) = select_category_ref.cast::<HtmlInputElement>() {
-                if let Some(select_article_type) =
-                    select_article_type_ref.cast::<HtmlInputElement>()
-                {
-                    if let Some(select_tags) = select_tag_ref.cast::<HtmlSelectElement>() {
-                        spawn_local(async move {
-                            let re_all =
-                                Regex::new(r"!\[.*]\(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+\)")
-                                    .unwrap();
-                            let re_part =
-                                Regex::new(r"https?://[\w/:%#\$&\?\(\)~\.=\+\-]+").unwrap();
-                            let mut save_urls = Vec::new();
-                            for caps in re_all.captures_iter(&*text) {
-                                let image_url = re_part
-                                    .captures(caps.get(0).unwrap().as_str())
-                                    .unwrap()
-                                    .get(0)
-                                    .unwrap()
-                                    .as_str();
-                                let image_url = image_url.split_at(image_url.len() - 1).0;
-                                let thumbnail_string = &*thumbnail;
-                                save_urls.push(image_url.to_string());
-                                save_urls.push(thumbnail_string.to_string());
-                            }
-                            let text_string = &*text;
+                if let Some(select_tags) = select_tag_ref.cast::<HtmlSelectElement>() {
+                    spawn_local(async move {
+                        let re_all =
+                            Regex::new(r"!\[.*]\(https?://[\w/:%#\$&\?\(\)~\.=\+\-]+\)").unwrap();
+                        let re_part = Regex::new(r"https?://[\w/:%#\$&\?\(\)~\.=\+\-]+").unwrap();
+                        let mut save_urls = Vec::new();
+                        for caps in re_all.captures_iter(&*text) {
+                            let image_url = re_part
+                                .captures(caps.get(0).unwrap().as_str())
+                                .unwrap()
+                                .get(0)
+                                .unwrap()
+                                .as_str();
+                            let image_url = image_url.split_at(image_url.len() - 1).0;
+                            let thumbnail_string = &*thumbnail;
+                            save_urls.push(image_url.to_string());
+                            save_urls.push(thumbnail_string.to_string());
+                        }
+                        let text_string = &*text;
 
-                            let select_tags_collection = select_tags.selected_options();
-                            let mut tags_vec = Vec::new();
-                            for i in 0..select_tags_collection.length() {
-                                if let Some(select_tag_item) = select_tags_collection.item(i) {
-                                    if let Some(select_tag_text) = select_tag_item.text_content() {
-                                        tags_vec.push(select_tag_text);
-                                    }
-                                };
-                            }
-
-                            let ariticle = NewArticle {
-                                category: select_category.value(),
-                                tags: tags_vec.to_vec(),
-                                thumbnail: thumbnail.to_string(),
-                                title: title.to_string(),
-                                content: text_string.to_string(),
-                                released: false,
-                                images: save_urls,
+                        let select_tags_collection = select_tags.selected_options();
+                        let mut tags_vec = Vec::new();
+                        for i in 0..select_tags_collection.length() {
+                            if let Some(select_tag_item) = select_tags_collection.item(i) {
+                                if let Some(select_tag_text) = select_tag_item.text_content() {
+                                    tags_vec.push(select_tag_text);
+                                }
                             };
-                            let serialized_article = serde_json::to_string(&ariticle).unwrap();
-                            set_content(select_article_type.value(), serialized_article).await;
-                        });
-                    }
+                        }
+
+                        let ariticle = NewArticle {
+                            category: select_category.value(),
+                            tags: tags_vec.to_vec(),
+                            thumbnail: thumbnail.to_string(),
+                            title: title.to_string(),
+                            content: text_string.to_string(),
+                            released: false,
+                            images: save_urls,
+                        };
+                        let serialized_article = serde_json::to_string(&ariticle).unwrap();
+
+                        if id == "new" {
+                            set_content(article_type, serialized_article).await;
+                        } else {
+                            update_content(article_type, serialized_article, id).await;
+                        }
+                    });
                 }
             }
         }
@@ -381,7 +391,7 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
     html! {
         <>
             <Header/>
-            <h1>{ "Blog Edit" }</h1>
+            <h1>{ article_type + " Edit" }</h1>
             <label>
                 <input ref={thumbnail_ref} type="file" id="image-upload"
                 accept="image/png, image/jpeg" onchange={onchange_thumbnail} /> {"thumbnail"}
@@ -390,15 +400,6 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
                 <input ref={file_ref} type="file" id="image-upload"
                 accept="image/png, image/jpeg, video/mp4" onchange={onchange_file} /> {"up"}
             </label>
-
-            if article_type == "new".to_string() {
-                <label for="article-type-select">{"Article Type"}
-                    <select name="article-type" ref={select_article_type_ref} id="article-type-select">
-                        <option value="blog" selected=true>{"Blog"}</option>
-                        <option value="work">{"Work"}</option>
-                    </select>
-                </label>
-            }
 
             <label for="category-select">{"Category"}
                 <input type="text" ref={new_category_ref}/>
@@ -430,7 +431,7 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
             if id == "new" {
                 <button onclick={post}>{"投稿"}</button>
             } else {
-                <button>{"編集"}</button>
+                <button onclick={post}>{"編集"}</button>
             }
             <Footer/>
         </>

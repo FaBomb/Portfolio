@@ -22,6 +22,12 @@ extern "C" {
     #[wasm_bindgen(js_name = "set_content", js_namespace = ["window", "_wasm_js_bridge"])]
     pub async fn set_content(collection: String, article: String);
 
+    #[wasm_bindgen(js_name = "update_content", js_namespace = ["window", "_wasm_js_bridge"])]
+    pub async fn update_content(collection: String, article: String, id: String);
+
+    #[wasm_bindgen(js_name = "update_released", js_namespace = ["window", "_wasm_js_bridge"])]
+    pub async fn update_released(collection: String, article: String, id: String);
+
     #[wasm_bindgen(js_name = "set_category", js_namespace = ["window", "_wasm_js_bridge"])]
     pub async fn set_category(category: String);
 
@@ -51,5 +57,8 @@ extern "C" {
 
     #[wasm_bindgen(js_name = "del_tag", js_namespace = ["window", "_wasm_js_bridge"])]
     pub async fn del_tag(tag: String);
+
+    #[wasm_bindgen(js_name = "del_content", js_namespace = ["window", "_wasm_js_bridge"])]
+    pub async fn del_content(collect: String, id: String);
 
 }
