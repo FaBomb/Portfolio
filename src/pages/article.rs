@@ -1,9 +1,7 @@
 use crate::compornents::{card::Card, footer::Footer, header::Header, pagination::Pagination};
-use crate::routing::AdminRoute;
-use js_bridge::{fetch_article_size, is_signed_in};
+use js_bridge::fetch_article_size;
 use wasm_bindgen_futures::spawn_local;
 use yew::{function_component, html, use_effect_with_deps, use_state, Properties};
-use yew_router::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct RenderedAtProps {
@@ -13,8 +11,6 @@ pub struct RenderedAtProps {
 
 #[function_component(Article)]
 pub fn article(props: &RenderedAtProps) -> Html {
-    let history = use_history().unwrap();
-    // let is_signed = use_state(|| false);
     let page_clone = props.page.clone();
     let page_u8: u8 = page_clone.parse::<u8>().unwrap();
     let page_size = use_state(|| 1);
@@ -23,22 +19,11 @@ pub fn article(props: &RenderedAtProps) -> Html {
     let limit_num = 3;
 
     {
-        // let is_signed = is_signed.clone();
         let page_size = page_size.clone();
         let article_type = article_type.clone();
-        let history = history.clone();
         use_effect_with_deps(
             move |_| {
-                // let is_signed = is_signed.clone();
-
-                // if is_signed == true -> 編集・削除・作成ボタン追加
                 spawn_local(async move {
-                    // let result = is_signed_in("_").await.as_bool().unwrap();
-                    // is_signed.set(result);
-                    // if !result {
-                    //     history.push(AdminRoute::Admin);
-                    // }
-
                     let fetch_page_size = fetch_article_size(article_type)
                         .await
                         .as_f64()

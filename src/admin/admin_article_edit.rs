@@ -1,8 +1,8 @@
 use crate::compornents::{footer::Footer, header::Header};
 use crate::routing::AdminRoute;
 use js_bridge::{
-    del_category, del_tag, fetch_categories, fetch_tags, is_signed_in, set_category, set_content,
-    set_tag, upload,
+    del_category, del_tag, fetch_all_article_content_from_id, fetch_categories, fetch_tags,
+    is_signed_in, set_category, set_content, set_tag, upload,
 };
 use pulldown_cmark::{html as markdown_html, Options, Parser};
 use regex::Regex;
@@ -11,7 +11,7 @@ use serde_json::Result;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlInputElement, HtmlSelectElement, Node};
 use yew::virtual_dom::VNode;
-use yew::{function_component, functional::*, html, use_effect_with_deps, use_state};
+use yew::{function_component, functional::*, html, use_effect_with_deps, use_state, Properties};
 use yew_router::prelude::*;
 
 pub fn markdown(source_text: &str) -> VNode {
@@ -46,7 +46,7 @@ fn pulldown_options(values: Vec<String>) -> Vec<VNode> {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Article {
+struct NewArticle {
     category: String,
     tags: Vec<String>,
     thumbnail: String,
@@ -56,9 +56,39 @@ struct Article {
     images: Vec<String>,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct Article {
+    category: String,
+    tags: Vec<String>,
+    thumbnail: String,
+    title: String,
+    content: String,
+}
+
+#[derive(Properties, PartialEq)]
+pub struct RenderedAtProps {
+    pub id: String,
+}
+
 #[function_component(AdminArticleEdit)]
-pub fn admin_article_edit() -> Html {
+pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
+    let id = props.id.clone();
+
     let history = use_history().unwrap();
+    let path_name = history.location().pathname();
+    let path_name_vec: Vec<&str> = path_name.split('/').collect();
+    let some_path_name = path_name_vec.get(1);
+    let current_path = match some_path_name {
+        Some(path) => path,
+        None => "",
+    };
+    let mut article_type = id;
+    let id = props.id.clone();
+    if current_path == "admin_work" && id != "new".to_string() {
+        article_type = "work".to_string();
+    } else if current_path == "admin_blog" && id != "new".to_string() {
+        article_type = "blog".to_string();
+    }
 
     let is_signed = use_state(|| true);
 
@@ -69,6 +99,9 @@ pub fn admin_article_edit() -> Html {
         .to_string()
     });
 
+    let init_category = use_state(|| "".to_string());
+    let init_tags_val: Vec<String> = Vec::new();
+    let init_tags = use_state(|| init_tags_val);
     let categories = use_state(Vec::new);
     let tags = use_state(Vec::new);
 
@@ -86,6 +119,14 @@ pub fn admin_article_edit() -> Html {
     let pulldown_category_option_vnode = pulldown_options(categories.to_vec());
     let pulldown_tag_option_vnode = pulldown_options(tags.to_vec());
     {
+        let id = id.clone();
+        let title_state = title.clone();
+        let init_category = init_category.clone();
+        let init_tags = init_tags.clone();
+        let thumbnail_state = thumbnail.clone();
+        let text = text.clone();
+
+        let article_type = article_type.clone();
         let is_signed = is_signed.clone();
         let categories = categories.clone();
         let tags = tags.clone();
@@ -99,6 +140,29 @@ pub fn admin_article_edit() -> Html {
                     is_signed.set(result);
                     if !result {
                         history.push(AdminRoute::Admin);
+                    }
+                    let article_content_value = fetch_all_article_content_from_id(article_type, id)
+                        .await
+                        .as_string();
+                    match article_content_value {
+                        Some(article_content) => {
+                            let article_result: Result<Article> =
+                                serde_json::from_str(&article_content);
+                            let article_result = article_result.unwrap();
+                            let category = article_result.category.clone();
+                            let tags = article_result.tags.clone();
+                            let thumbnail = article_result.thumbnail.clone();
+                            let title = article_result.title.clone();
+                            let content = article_result.content.clone();
+                            init_category.set(category);
+                            init_tags.set(tags);
+                            thumbnail_state.set(thumbnail);
+                            title_state.set(title);
+                            text.set(content);
+                        }
+                        None => {
+                            log::info!("{:?}", "fetch_all_article_content_from_id null");
+                        }
                     }
 
                     let categories_value = fetch_categories().await.as_string().unwrap();
@@ -238,7 +302,7 @@ pub fn admin_article_edit() -> Html {
                                 };
                             }
 
-                            let ariticle = Article {
+                            let ariticle = NewArticle {
                                 category: select_category.value(),
                                 tags: tags_vec.to_vec(),
                                 thumbnail: thumbnail.to_string(),
@@ -327,12 +391,14 @@ pub fn admin_article_edit() -> Html {
                 accept="image/png, image/jpeg, video/mp4" onchange={onchange_file} /> {"up"}
             </label>
 
-            <label for="article-type-select">{"Article Type"}
-                <select name="article-type" ref={select_article_type_ref} id="article-type-select">
-                    <option value="blog">{"Blog"}</option>
-                    <option value="work">{"Work"}</option>
-                </select>
-            </label>
+            if article_type == "new".to_string() {
+                <label for="article-type-select">{"Article Type"}
+                    <select name="article-type" ref={select_article_type_ref} id="article-type-select">
+                        <option value="blog" selected=true>{"Blog"}</option>
+                        <option value="work">{"Work"}</option>
+                    </select>
+                </label>
+            }
 
             <label for="category-select">{"Category"}
                 <input type="text" ref={new_category_ref}/>
@@ -352,16 +418,20 @@ pub fn admin_article_edit() -> Html {
                 <button onclick={del_tag}>{"-"}</button>
             </label>
 
-            <textarea ref={title_ref} oninput={oninput_title} />
+            <textarea ref={title_ref} oninput={oninput_title} value={title.to_string()} />
             <div class="markdown">
-                <textarea ref={text_ref} oninput={oninput_value} />
+                <textarea ref={text_ref} oninput={oninput_value} value={text.to_string()} />
                 <div class="preview">
                     <img src={thumbnail_string.to_string()} alt="thumbnail" />
                     <h1>{title_string}</h1>
                     {markdown_vnode}
                 </div>
             </div>
-            <button onclick={post}>{"投稿"}</button>
+            if id == "new" {
+                <button onclick={post}>{"投稿"}</button>
+            } else {
+                <button>{"編集"}</button>
+            }
             <Footer/>
         </>
     }

@@ -1,4 +1,4 @@
-use crate::routing::{AdminRoute, AppRoute, BlogRoute, WorkRoute};
+use crate::routing::{AdminBlogRoute, AdminRoute, AdminWorkRoute, AppRoute, BlogRoute, WorkRoute};
 use js_bridge::{is_signed_in, sign_out};
 use wasm_bindgen_futures::spawn_local;
 use yew::{function_component, html, use_effect_with_deps, use_state, Callback};
@@ -23,22 +23,32 @@ pub fn header() -> Html {
         })
     });
     let history = use_history().unwrap();
-    let go_article_edit = Callback::from(move |_| history.push(AdminRoute::AdminArticleEdit));
+    let go_new_blog = Callback::from(move |_| {
+        history.push(AdminBlogRoute::AdminArticleEdit {
+            id: "new".to_string(),
+        })
+    });
+    let history = use_history().unwrap();
+    let go_new_work = Callback::from(move |_| {
+        history.push(AdminWorkRoute::AdminArticleEdit {
+            id: "new".to_string(),
+        })
+    });
 
     let history = use_history().unwrap();
 
     let path_name = history.location().pathname();
     let path_name_vec: Vec<&str> = path_name.split('/').collect();
     let some_path_name = path_name_vec.get(1);
-    let some_admin_path_name = path_name_vec.get(2);
+    // let some_admin_path_name = path_name_vec.get(2);
     let current_path_name = match some_path_name {
         Some(path) => path,
         None => "",
     };
-    let current_admin_path_name = match some_admin_path_name {
-        Some(path) => path,
-        None => "",
-    };
+    // let current_admin_path_name = match some_admin_path_name {
+    //     Some(path) => path,
+    //     None => "",
+    // };
 
     let onclick_sign_out = {
         let is_signed = is_signed.clone();
@@ -83,21 +93,27 @@ pub fn header() -> Html {
                     <button onclick={go_home}>{ "Home" }</button>
                     <button onclick={go_work}>{ "Work" }</button>
                     if *is_signed {
+                        <button onclick={go_new_blog}>{ "NewBlog" }</button>
+                        <button onclick={go_new_work}>{ "NewWork" }</button>
                         <button onclick={onclick_sign_out}>{ "SignOut" }</button>
-                        <button onclick={go_article_edit}>{ "ArticleEdit" }</button>
                     }
                 } else if current_path_name == "work" {
                     <button onclick={go_home}>{ "Home" }</button>
                     <button onclick={go_blog}>{ "Blog" }</button>
                     if *is_signed {
+                        <button onclick={go_new_blog}>{ "NewBlog" }</button>
+                        <button onclick={go_new_work}>{ "NewWork" }</button>
                         <button onclick={onclick_sign_out}>{ "SignOut" }</button>
-                        <button onclick={go_article_edit}>{ "ArticleEdit" }</button>
                     }
-                } else if current_admin_path_name == "article_edit" {
+                } else if current_path_name == "admin" {
                     <button onclick={go_home}>{ "Home" }</button>
                     <button onclick={go_blog}>{ "Blog" }</button>
                     <button onclick={go_work}>{ "Work" }</button>
-                    <button onclick={onclick_sign_out}>{ "SignOut" }</button>
+                    if *is_signed {
+                        <button onclick={go_new_blog}>{ "NewBlog" }</button>
+                        <button onclick={go_new_work}>{ "NewWork" }</button>
+                        <button onclick={onclick_sign_out}>{ "SignOut" }</button>
+                    }
                 } else {
                     <button onclick={go_home}>{ "Home" }</button>
                     <button onclick={go_blog}>{ "Blog" }</button>
