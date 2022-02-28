@@ -155,7 +155,6 @@ export const fetch_article_contents = async(collect:string, index: number, limit
     const article_contents_json = JSON.stringify(articles);
     return article_contents_json;
 }
-
 export const fetch_article_content_from_id = async(collect:string, id: string):Promise<string> => {
     let article;
     await getDoc(doc(store, collect, id)).then((snapshot) => {
@@ -170,6 +169,27 @@ export const fetch_article_content_from_id = async(collect:string, id: string):P
     }).catch((error) => {
         console.error("fetch_article_contents is error", error);
     });
+    const article_ids_json = JSON.stringify(article);
+    return article_ids_json;
+}
+
+export const fetch_all_article_content_from_id = async(collect:string, id: string):Promise<string> => {
+    let article;
+    await getDoc(doc(store, collect, id)).then((snapshot) => {
+        const data = snapshot.data({ serverTimestamps: "estimate" });
+        if (data) {
+            article = {
+                content: data.article.content,
+                tags: data.article.tags,
+                category: data.article.category,
+                title: data.article.title,
+                thumbnail: data.article.thumbnail,
+            }
+        }
+    }).catch((error) => {
+        console.error("fetch_article_contents is error", error);
+    });
+
     const article_ids_json = JSON.stringify(article);
     return article_ids_json;
 }

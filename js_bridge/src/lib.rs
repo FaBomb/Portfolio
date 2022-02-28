@@ -40,6 +40,9 @@ extern "C" {
     #[wasm_bindgen(js_name = "fetch_article_content_from_id", js_namespace = ["window", "_wasm_js_bridge"])]
     pub async fn fetch_article_content_from_id(collection: String, id: String) -> JsValue;
 
+    #[wasm_bindgen(js_name = "fetch_all_article_content_from_id", js_namespace = ["window", "_wasm_js_bridge"])]
+    pub async fn fetch_all_article_content_from_id(collection: String, id: String) -> JsValue;
+
     #[wasm_bindgen(js_name = "fetch_tags", js_namespace = ["window", "_wasm_js_bridge"])]
     pub async fn fetch_tags() -> JsValue;
 

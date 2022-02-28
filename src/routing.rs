@@ -6,6 +6,10 @@ pub enum AppRoute {
     Home,
     #[at("/admin/:s")]
     AdminPage,
+    #[at("/admin_blog/:s")]
+    AdminBlogPage,
+    #[at("/admin_work/:s")]
+    AdminWorkPage,
     #[at("/blog/:s")]
     BlogPage,
     #[at("/work/:s")]
@@ -22,10 +26,24 @@ pub enum AppRoute {
 pub enum AdminRoute {
     #[at("/admin/entrance")]
     Admin,
-    #[at("/admin/article_edit")]
-    AdminArticleEdit,
     #[not_found]
     #[at("/admin/404")]
+    NotFound,
+}
+#[derive(Clone, Routable, PartialEq)]
+pub enum AdminBlogRoute {
+    #[at("/admin_blog/:id")]
+    AdminArticleEdit { id: String },
+    #[not_found]
+    #[at("/admin_blog/404")]
+    NotFound,
+}
+#[derive(Clone, Routable, PartialEq)]
+pub enum AdminWorkRoute {
+    #[at("/admin_work/:id")]
+    AdminArticleEdit { id: String },
+    #[not_found]
+    #[at("/admin_work/404")]
     NotFound,
 }
 #[derive(Clone, Routable, PartialEq)]
