@@ -40,16 +40,30 @@ pub fn view(props: &RenderedAtProps) -> Html {
     let article = use_state(|| article_init);
     let history = use_history().unwrap();
     let id = props.id.clone();
+
+    let path_name = history.location().pathname();
+    let path_name_vec: Vec<&str> = path_name.split('/').collect();
+    let some_path_name = path_name_vec.get(1);
+    let current_path = match some_path_name {
+        Some(path) => path,
+        None => "",
+    };
+    let article_type;
+    if current_path == "view_blog" {
+        article_type = "blog".to_string();
+    } else {
+        article_type = "work".to_string();
+    }
+
     {
         let article = article.clone();
         use_effect_with_deps(
             move |_| {
                 let article = article.clone();
                 spawn_local(async move {
-                    let article_content_value =
-                        fetch_article_content_from_id("blog".to_string(), id)
-                            .await
-                            .as_string();
+                    let article_content_value = fetch_article_content_from_id(article_type, id)
+                        .await
+                        .as_string();
                     match article_content_value {
                         Some(article_content) => {
                             let article_result: Result<Article> =

@@ -1,4 +1,4 @@
-use crate::routing::{AdminBlogRoute, AdminWorkRoute, AppRoute};
+use crate::routing::{AdminBlogRoute, AdminWorkRoute, ViewBlogRoute, ViewWorkRoute};
 use js_bridge::{del_content, fetch_article_contents, is_signed_in, update_released};
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
@@ -59,7 +59,6 @@ pub fn card(props: &RenderedAtProps) -> Html {
                     let article_contents_result: Result<Vec<Article>> =
                         serde_json::from_str(&article_contents_value);
                     let mut vnode: Vec<VNode> = Vec::new();
-
                     for article_content in article_contents_result.unwrap() {
                         let article_id = article_content.id.clone();
                         let article_content_string =
@@ -68,8 +67,19 @@ pub fn card(props: &RenderedAtProps) -> Html {
                             let history = history.clone();
                             let article_id = article_id.clone();
                             move |_| {
+                                let path_name = history.location().pathname();
+                                let path_name_vec: Vec<&str> = path_name.split('/').collect();
+                                let some_path_name = path_name_vec.get(1);
+                                let current_path = match some_path_name {
+                                    Some(path) => path,
+                                    None => "",
+                                };
                                 let article_id = article_id.clone();
-                                history.push(AppRoute::View { id: article_id });
+                                if current_path == "blog" {
+                                    history.push(ViewBlogRoute::View { id: article_id });
+                                } else if current_path == "work" {
+                                    history.push(ViewWorkRoute::View { id: article_id });
+                                }
                             }
                         };
                         let edit_article = {
@@ -194,8 +204,19 @@ pub fn card(props: &RenderedAtProps) -> Html {
                         let history = history.clone();
                         let article_id = article_id.clone();
                         move |_| {
+                            let path_name = history.location().pathname();
+                            let path_name_vec: Vec<&str> = path_name.split('/').collect();
+                            let some_path_name = path_name_vec.get(1);
+                            let current_path = match some_path_name {
+                                Some(path) => path,
+                                None => "",
+                            };
                             let article_id = article_id.clone();
-                            history.push(AppRoute::View { id: article_id });
+                            if current_path == "blog" {
+                                history.push(ViewBlogRoute::View { id: article_id });
+                            } else if current_path == "work" {
+                                history.push(ViewWorkRoute::View { id: article_id });
+                            }
                         }
                     };
                     let edit_article = {
