@@ -30,6 +30,7 @@ pub struct RenderedAtProps {
 #[function_component(Card)]
 pub fn card(props: &RenderedAtProps) -> Html {
     let is_signed = use_state(|| false);
+    let rerender = use_state(|| false);
     let history = use_history().unwrap();
     let init_card_vnode: Vec<VNode> = Vec::new();
     let card_vnode = use_state(|| init_card_vnode);
@@ -38,6 +39,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
 
     {
         let card_vnode = card_vnode.clone();
+        let rerender = rerender.clone();
         let props_current_page = props.current_page.clone();
         let limit_num = props.limit_num.clone();
         let history = history.clone();
@@ -94,9 +96,11 @@ pub fn card(props: &RenderedAtProps) -> Html {
                         let del_article = {
                             let history = history.clone();
                             let article_id = article_id.clone();
+                            let rerender = rerender.clone();
                             move |_| {
                                 let article_id = article_id.clone();
                                 let path_name = history.location().pathname();
+                                let rerender = rerender.clone();
                                 spawn_local(async move {
                                     let path_name_vec: Vec<&str> = path_name.split('/').collect();
                                     let some_path_name = path_name_vec.get(1);
@@ -105,6 +109,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
                                         None => "",
                                     };
                                     del_content(current_path.to_string(), article_id).await;
+                                    rerender.set(true);
                                 });
                             }
                         };
@@ -112,8 +117,10 @@ pub fn card(props: &RenderedAtProps) -> Html {
                         let change_released = {
                             let history = history.clone();
                             let article_id = article_id.clone();
+                            let rerender = rerender.clone();
                             let article_content_string = article_content_string.clone();
                             move |_| {
+                                let rerender = rerender.clone();
                                 let article_content_string = article_content_string.clone();
                                 let article_id = article_id.clone();
                                 let path_name = history.location().pathname();
@@ -130,6 +137,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
                                         article_id,
                                     )
                                     .await;
+                                    rerender.set(true);
                                 });
                             }
                         };
@@ -163,6 +171,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
     let change_article = {
         let props_current_page = props.current_page.clone();
         let limit_num = props.limit_num.clone();
+        let rerender = rerender.clone();
         let card_vnode = card_vnode.clone();
         let current_page = current_page.clone();
         let article_type = article_type.clone();
@@ -211,9 +220,11 @@ pub fn card(props: &RenderedAtProps) -> Html {
                     let del_article = {
                         let history = history.clone();
                         let article_id = article_id.clone();
+                        let rerender = rerender.clone();
                         move |_| {
                             let article_id = article_id.clone();
                             let path_name = history.location().pathname();
+                            let rerender = rerender.clone();
                             spawn_local(async move {
                                 let path_name_vec: Vec<&str> = path_name.split('/').collect();
                                 let some_path_name = path_name_vec.get(1);
@@ -222,15 +233,18 @@ pub fn card(props: &RenderedAtProps) -> Html {
                                     None => "",
                                 };
                                 del_content(current_path.to_string(), article_id).await;
+                                rerender.set(true);
                             });
                         }
                     };
 
                     let change_released = {
                         let history = history.clone();
+                        let rerender = rerender.clone();
                         let article_id = article_id.clone();
                         let article_content_string = article_content_string.clone();
                         move |_| {
+                            let rerender = rerender.clone();
                             let article_content_string = article_content_string.clone();
                             let article_id = article_id.clone();
                             let path_name = history.location().pathname();
@@ -247,6 +261,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
                                     article_id,
                                 )
                                 .await;
+                                rerender.set(true);
                             });
                         }
                     };
@@ -269,13 +284,14 @@ pub fn card(props: &RenderedAtProps) -> Html {
                     };
                     vnode.push(card);
                 }
+                rerender.set(false);
                 card_vnode.set(vnode);
                 current_page.set(props_current_page);
             });
         }
     };
 
-    if props.current_page != *current_page {
+    if props.current_page != *current_page || *rerender {
         change_article("");
     }
     let new_card_vnode: Vec<VNode> = card_vnode.to_vec();
