@@ -14,12 +14,30 @@ pub enum AppRoute {
     BlogPage,
     #[at("/work/:s")]
     WorkPage,
-    #[at("view/:id")]
-    View { id: String },
+    #[at("view_blog/:s")]
+    ViewBlogPage,
+    #[at("view_work/:s")]
+    ViewWorkPage,
     #[at("/profile")]
     Profile,
     #[not_found]
     #[at("/404")]
+    NotFound,
+}
+#[derive(Clone, Routable, PartialEq)]
+pub enum ViewBlogRoute {
+    #[at("/view_blog/:id")]
+    View { id: String },
+    #[not_found]
+    #[at("/view_blog/404")]
+    NotFound,
+}
+#[derive(Clone, Routable, PartialEq)]
+pub enum ViewWorkRoute {
+    #[at("/view_work/:id")]
+    View { id: String },
+    #[not_found]
+    #[at("/view_work/404")]
     NotFound,
 }
 #[derive(Clone, Routable, PartialEq)]
