@@ -25,17 +25,18 @@ pub struct RenderedAtProps {
     pub current_page: u8,
     pub limit_num: u8,
     pub article_type: String,
+    pub is_signed: bool,
 }
 
 #[function_component(Card)]
 pub fn card(props: &RenderedAtProps) -> Html {
-    let is_signed = use_state(|| false);
     let rerender = use_state(|| false);
     let history = use_history().unwrap();
     let init_card_vnode: Vec<VNode> = Vec::new();
     let card_vnode = use_state(|| init_card_vnode);
     let current_page = use_state(|| props.current_page);
     let article_type = props.article_type.clone();
+    let is_signed = props.is_signed.clone();
 
     {
         let card_vnode = card_vnode.clone();
@@ -44,18 +45,19 @@ pub fn card(props: &RenderedAtProps) -> Html {
         let limit_num = props.limit_num.clone();
         let history = history.clone();
         let article_type = article_type.clone();
-        let is_signed = is_signed.clone();
         use_effect_with_deps(
             move |_| {
                 spawn_local(async move {
-                    let result = is_signed_in("_").await.as_bool().unwrap();
-                    is_signed.set(result);
-
-                    let article_contents_value =
-                        fetch_article_contents(article_type, props_current_page, limit_num)
-                            .await
-                            .as_string()
-                            .unwrap();
+                    let is_signed_result = is_signed_in("_").await.as_bool().unwrap();
+                    let article_contents_value = fetch_article_contents(
+                        article_type,
+                        props_current_page,
+                        limit_num,
+                        is_signed_result,
+                    )
+                    .await
+                    .as_string()
+                    .unwrap();
                     let article_contents_result: Result<Vec<Article>> =
                         serde_json::from_str(&article_contents_value);
                     let mut vnode: Vec<VNode> = Vec::new();
@@ -157,7 +159,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
                                 <img onclick={go_view} src={article_content.thumbnail}/>
                                 <time>{article_content.updated_at}</time>
                                 <h1>{article_content.title}</h1>
-                                if result {
+                                if is_signed_result {
                                     <button onclick={edit_article}>{"Edit"}</button>
                                     <button onclick={del_article}>{"Delete"}</button>
                                     if article_content.released {
@@ -185,10 +187,11 @@ pub fn card(props: &RenderedAtProps) -> Html {
         let card_vnode = card_vnode.clone();
         let current_page = current_page.clone();
         let article_type = article_type.clone();
+        let is_signed = is_signed.clone();
         move |_| {
             spawn_local(async move {
                 let article_contents_value =
-                    fetch_article_contents(article_type, props_current_page, limit_num)
+                    fetch_article_contents(article_type, props_current_page, limit_num, is_signed)
                         .await
                         .as_string()
                         .unwrap();
@@ -292,7 +295,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
                             <img onclick={go_view} src={article_content.thumbnail}/>
                             <time>{article_content.updated_at}</time>
                             <h1>{article_content.title}</h1>
-                            if *is_signed {
+                            if is_signed {
                                 <button onclick={edit_article}>{"Edit"}</button>
                                 <button onclick={del_article}>{"Delete"}</button>
                                 if article_content.released {

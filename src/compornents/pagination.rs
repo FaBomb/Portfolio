@@ -1,10 +1,11 @@
-use crate::routing::BlogRoute;
+use crate::routing::{BlogRoute, WorkRoute};
 use yew::virtual_dom::VNode;
 use yew::{function_component, html, Properties};
 use yew_router::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct RenderedAtProps {
+    pub article_type: String,
     pub current_page: u8,
     pub page_size: u8,
 }
@@ -12,13 +13,22 @@ pub struct RenderedAtProps {
 #[function_component(Pagination)]
 pub fn pagination(props: &RenderedAtProps) -> Html {
     let mut pagination: Vec<VNode> = Vec::new();
+    let article_type = props.article_type.clone();
+
     for page in 1..props.page_size {
         let page_change = {
             let history = use_history().unwrap();
+            let article_type = article_type.clone();
             move |_| {
-                history.push(BlogRoute::Blog {
-                    page: page.to_string(),
-                });
+                if article_type == "blog" {
+                    history.push(BlogRoute::Blog {
+                        page: page.to_string(),
+                    });
+                } else {
+                    history.push(WorkRoute::Work {
+                        page: page.to_string(),
+                    });
+                }
             }
         };
         let li_tag;

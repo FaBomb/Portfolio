@@ -2,7 +2,7 @@ import { store } from "./connect";
 import { fetch_unused, update_metadata, del_from_url } from "./storage";
 import { doc, updateDoc, setDoc, getDoc, deleteDoc,
          collection, addDoc, serverTimestamp, getDocs,
-         query, orderBy, limit, startAt, endAt } from "firebase/firestore";
+         query, orderBy, limit, startAt, where } from "firebase/firestore";
 
 const adjust_storage = async(used_urls: Array<string>) => {
     const unused_urls = await fetch_unused();
@@ -134,17 +134,28 @@ export const fetch_tags = async():Promise<string> => {
     return tags_json;
 }
 
-export const fetch_article_size = async(collect:string):Promise<number> => {
-    let article_size: number = 0; 
-    await getDocs(collection(store, collect)).then((snapshot) => {
-        article_size = snapshot.size;
-    }).catch((e) => {
-        console.error(e);
-    })
+export const fetch_article_size = async(collect:string, is_signed: boolean):Promise<number> => {
+    
+    let article_size: number = 0;
+    if (is_signed) {
+        await getDocs(collection(store, collect)).then((snapshot) => {
+            article_size = snapshot.size;
+        }).catch((e) => {
+            console.error(e);
+        })
+    } else {
+        const articleRef = collection(store, collect);
+        const q = query(articleRef, where("article.released", "==", true));
+        await getDocs(q).then((snapshot) => {
+            article_size = snapshot.size;
+        }).catch((e) => {
+            console.error(e);
+        })
+    }
     return article_size;
 }
 
-export const fetch_article_contents = async(collect:string, index: number, limit_num: number):Promise<string> => {
+export const fetch_article_contents = async(collect:string, index: number, limit_num: number, is_signed: boolean):Promise<string> => {
     const start_index: number = limit_num * (index - 1);
     const articles: Array<Article> = [];
     interface Article{
@@ -159,13 +170,24 @@ export const fetch_article_contents = async(collect:string, index: number, limit
         updated_at: string,
     }
 
-    const first = query(collection(store, collect), orderBy("created_at", "desc"),
-                        limit(start_index + 1));
+    const articleRef = collection(store, collect);
+    let first;
+    if (is_signed) {
+        first = query(articleRef, limit(start_index + 1));
+    } else {
+        first = query(articleRef, where("article.released", "==", true),
+                 limit(start_index + 1));
+    }
     const documentSnapshots = await getDocs(first);
     const lastVisible = documentSnapshots.docs[documentSnapshots.docs.length-1];
 
-    const q = query(collection(store, collect), orderBy("created_at", "desc"),
-                    startAt(lastVisible), limit(limit_num) );
+    let q;
+    if (is_signed) {
+        q = query(articleRef, startAt(lastVisible), limit(limit_num) );
+    } else {
+        q = query(articleRef, where("article.released", "==", true),
+            startAt(lastVisible), limit(limit_num) );
+    }
 
     await getDocs(q).then((snapshot) => {
         snapshot.docs.forEach(doc => {
@@ -195,6 +217,7 @@ export const fetch_article_contents = async(collect:string, index: number, limit
     const article_contents_json = JSON.stringify(articles);
     return article_contents_json;
 }
+
 export const fetch_article_content_from_id = async(collect:string, id: string):Promise<string> => {
     let article;
     await getDoc(doc(store, collect, id)).then((snapshot) => {

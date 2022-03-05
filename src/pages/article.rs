@@ -1,5 +1,5 @@
 use crate::compornents::{card::Card, footer::Footer, header::Header, pagination::Pagination};
-use js_bridge::fetch_article_size;
+use js_bridge::{fetch_article_size, is_signed_in};
 use wasm_bindgen_futures::spawn_local;
 use yew::{function_component, html, use_effect_with_deps, use_state, Properties};
 
@@ -15,16 +15,20 @@ pub fn article(props: &RenderedAtProps) -> Html {
     let page_u8: u8 = page_clone.parse::<u8>().unwrap();
     let page_size = use_state(|| 1);
     let article_type = props.article_type.clone();
+    let is_signed = use_state(|| false);
 
     let limit_num = 3;
 
     {
         let page_size = page_size.clone();
         let article_type = article_type.clone();
+        let is_signed = is_signed.clone();
         use_effect_with_deps(
             move |_| {
                 spawn_local(async move {
-                    let fetch_page_size = fetch_article_size(article_type)
+                    let result = is_signed_in("_").await.as_bool().unwrap();
+                    is_signed.set(result);
+                    let fetch_page_size = fetch_article_size(article_type, result)
                         .await
                         .as_f64()
                         .unwrap()
@@ -43,13 +47,14 @@ pub fn article(props: &RenderedAtProps) -> Html {
         );
     }
 
+    let prop_article_type = article_type.clone();
     html! {
         <>
             <Header/>
-            <h1>{ "Admin Blog" }</h1>
-            <Card current_page={page_u8} limit_num={limit_num} article_type={article_type}/>
+            <h1>{ article_type.clone() }</h1>
+            <Card current_page={page_u8} limit_num={limit_num} article_type={article_type} is_signed={*is_signed}/>
             <ul class="pagenation">
-                <Pagination current_page={page_u8} page_size={*page_size}/>
+                <Pagination article_type={prop_article_type} current_page={page_u8} page_size={*page_size}/>
             </ul>
             <Footer/>
         </>
