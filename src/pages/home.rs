@@ -1,23 +1,80 @@
-use crate::compornents::{footer::Footer, header::Header};
-use crate::routing::BlogRoute;
-use yew::{function_component, html, Callback};
+use crate::compornents::{card::Card, footer::Footer, header::Header};
+use crate::routing::{AppRoute, BlogRoute, WorkRoute};
+use yew::{function_component, html};
 use yew_router::prelude::*;
 
 #[function_component(Home)]
 pub fn home() -> Html {
     let history = use_history().unwrap();
 
-    let onclick_callback = Callback::from(move |_| {
-        history.push(BlogRoute::Blog {
-            page: "1".to_string(),
-        })
-    });
+    let go_blog = {
+        let history = history.clone();
+        move |_| {
+            history.push(BlogRoute::Blog {
+                page: "1".to_string(),
+            })
+        }
+    };
+    let go_work = {
+        let history = history.clone();
+        move |_| {
+            history.push(WorkRoute::Work {
+                page: "1".to_string(),
+            })
+        }
+    };
+    let go_profile = {
+        let history = history.clone();
+        move |_| history.push(AppRoute::Profile)
+    };
 
     html! {
         <>
             <Header/>
-            <h1>{ "Home" }</h1>
-            <button onclick={onclick_callback}>{ "Go Blog" }</button>
+            <div class="home-ex">
+                <div class="ex-me">
+                    <h2>{ "Tech" }</h2>
+                    <h3>{ "×" }</h3>
+                    <h2>{ "Life" }</h2>
+                    <h3>{ "=" }</h3>
+                </div>
+                <div class="ex-detail">
+                    <p>{"Technology will accompany people's lives and coexist with them."}</p>
+                    <p>{"I will create products that have never been created before and improve people's lives little by little."}</p>
+                </div>
+            </div>
+            <div class="home-work">
+                <h2><a onclick={go_work.clone()}>{ "- Work -" }</a></h2>
+                <p class="small-text sub-text">{"作品"}</p>
+                <div class="cards">
+                    <Card current_page={1} limit_num={4} article_type={"work"} is_signed={false}/>
+                </div>
+                <a onclick={go_work} class="detail">{"- more -"}</a>
+            </div>
+            <div class="home-blog">
+                <h2><a onclick={go_blog.clone()}>{ "- Blog -" }</a></h2>
+                <p class="small-text sub-text">{"ブログ記事"}</p>
+                <div class="cards">
+                    <Card current_page={1} limit_num={4} article_type={"blog"} is_signed={false}/>
+                </div>
+                <a onclick={go_blog} class="detail">{"- more -"}</a>
+            </div>
+            <div class="home-profile">
+                <h2><a onclick={go_profile.clone()}>{ "- Profile -" }</a></h2>
+                <p class="small-text sub-text">{"プロフィール"}</p>
+                <div class="home-profile-box">
+                    <img src="images/profile.jpg" alt="プロフィール画像" />
+                    <dl class="home-row">
+                        <dt>{"Name"}</dt>
+                        <dd>{"Yuta Toyomi"}</dd>
+                        <dt>{"Birthday"}</dt>
+                        <dd>{"12.31.1997"}</dd>
+                        <dt>{"Occupation"}</dt>
+                        <dd>{"Web Engineer"}</dd>
+                    </dl>
+                </div>
+                <a onclick={go_profile} class="detail">{"- more -"}</a>
+            </div>
             <Footer/>
         </>
     }
