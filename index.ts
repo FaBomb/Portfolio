@@ -1,4 +1,7 @@
 import "./assets/favicon.png"
+import "./assets/logo.svg"
+import "./assets/logo-opacity.svg"
+import "./assets/profile.jpg"
 import "./assets/reset.scss"
 import "./assets/style.scss"
 const wasmPromise = import("./dist/app");

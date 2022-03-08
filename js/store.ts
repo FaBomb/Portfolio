@@ -173,20 +173,20 @@ export const fetch_article_contents = async(collect:string, index: number, limit
     const articleRef = collection(store, collect);
     let first;
     if (is_signed) {
-        first = query(articleRef, limit(start_index + 1));
+        first = query(articleRef, orderBy("created_at", "desc"), limit(start_index + 1));
     } else {
         first = query(articleRef, where("article.released", "==", true),
-                 limit(start_index + 1));
+                orderBy("created_at", "desc"), limit(start_index + 1));
     }
     const documentSnapshots = await getDocs(first);
     const lastVisible = documentSnapshots.docs[documentSnapshots.docs.length-1];
 
     let q;
     if (is_signed) {
-        q = query(articleRef, startAt(lastVisible), limit(limit_num) );
+        q = query(articleRef, orderBy("created_at", "desc"), startAt(lastVisible), limit(limit_num) );
     } else {
         q = query(articleRef, where("article.released", "==", true),
-            startAt(lastVisible), limit(limit_num) );
+            orderBy("created_at", "desc"), startAt(lastVisible), limit(limit_num) );
     }
 
     await getDocs(q).then((snapshot) => {

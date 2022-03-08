@@ -17,7 +17,7 @@ pub fn article(props: &RenderedAtProps) -> Html {
     let article_type = props.article_type.clone();
     let is_signed = use_state(|| false);
 
-    let limit_num = 3;
+    let limit_num = 6;
 
     {
         let page_size = page_size.clone();
@@ -51,11 +51,15 @@ pub fn article(props: &RenderedAtProps) -> Html {
     html! {
         <>
             <Header/>
-            <h1>{ article_type.clone() }</h1>
-            <Card current_page={page_u8} limit_num={limit_num} article_type={article_type} is_signed={*is_signed}/>
-            <ul class="pagenation">
-                <Pagination article_type={prop_article_type} current_page={page_u8} page_size={*page_size}/>
-            </ul>
+            <div class="article">
+                <h1>{"- "} { article_type.clone() } {" -"}</h1>
+                <div class="cards">
+                    <Card current_page={page_u8} limit_num={limit_num} article_type={article_type} is_signed={*is_signed}/>
+                </div>
+                <ul class="pagination">
+                    <Pagination article_type={prop_article_type} current_page={page_u8} page_size={*page_size}/>
+                </ul>
+            </div>
             <Footer/>
         </>
     }

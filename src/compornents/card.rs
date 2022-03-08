@@ -50,7 +50,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
                 spawn_local(async move {
                     let is_signed_result = is_signed_in("_").await.as_bool().unwrap();
                     let article_contents_value = fetch_article_contents(
-                        article_type,
+                        article_type.clone(),
                         props_current_page,
                         limit_num,
                         is_signed_result,
@@ -68,18 +68,13 @@ pub fn card(props: &RenderedAtProps) -> Html {
                         let go_view = {
                             let history = history.clone();
                             let article_id = article_id.clone();
+                            let article_type = article_type.clone();
                             move |_| {
-                                let path_name = history.location().pathname();
-                                let path_name_vec: Vec<&str> = path_name.split('/').collect();
-                                let some_path_name = path_name_vec.get(1);
-                                let current_path = match some_path_name {
-                                    Some(path) => path,
-                                    None => "",
-                                };
+                                let article_type = article_type.clone();
                                 let article_id = article_id.clone();
-                                if current_path == "blog" {
+                                if article_type == "blog" {
                                     history.push(ViewBlogRoute::View { id: article_id });
-                                } else if current_path == "work" {
+                                } else if article_type == "work" {
                                     history.push(ViewWorkRoute::View { id: article_id });
                                 }
                             }
@@ -157,16 +152,18 @@ pub fn card(props: &RenderedAtProps) -> Html {
                         let card = html! {
                             <div class="card" >
                                 <img onclick={go_view} src={article_content.thumbnail}/>
-                                <time>{article_content.updated_at}</time>
-                                <h1>{article_content.title}</h1>
+                                <time class="small-text">{article_content.updated_at}</time>
+                                <h2>{article_content.title}</h2>
                                 if is_signed_result {
-                                    <button onclick={edit_article}>{"Edit"}</button>
-                                    <button onclick={del_article}>{"Delete"}</button>
-                                    if article_content.released {
-                                        <button onclick={change_released}>{"Public"}</button>
-                                    } else {
-                                        <button onclick={change_released}>{"Private"}</button>
-                                    }
+                                    <div class="card-buttons">
+                                        <button onclick={edit_article}>{"Edit"}</button>
+                                        <button onclick={del_article}>{"Delete"}</button>
+                                        if article_content.released {
+                                            <button onclick={change_released}>{"Public"}</button>
+                                        } else {
+                                            <button onclick={change_released}>{"Private"}</button>
+                                        }
+                                    </div>
                                 }
                             </div>
                         };
@@ -190,11 +187,15 @@ pub fn card(props: &RenderedAtProps) -> Html {
         let is_signed = is_signed.clone();
         move |_| {
             spawn_local(async move {
-                let article_contents_value =
-                    fetch_article_contents(article_type, props_current_page, limit_num, is_signed)
-                        .await
-                        .as_string()
-                        .unwrap();
+                let article_contents_value = fetch_article_contents(
+                    article_type.clone(),
+                    props_current_page,
+                    limit_num,
+                    is_signed,
+                )
+                .await
+                .as_string()
+                .unwrap();
                 let article_contents_result: Result<Vec<Article>> =
                     serde_json::from_str(&article_contents_value);
                 let mut vnode: Vec<VNode> = Vec::new();
@@ -206,18 +207,13 @@ pub fn card(props: &RenderedAtProps) -> Html {
                     let go_view = {
                         let history = history.clone();
                         let article_id = article_id.clone();
+                        let article_type = article_type.clone();
                         move |_| {
-                            let path_name = history.location().pathname();
-                            let path_name_vec: Vec<&str> = path_name.split('/').collect();
-                            let some_path_name = path_name_vec.get(1);
-                            let current_path = match some_path_name {
-                                Some(path) => path,
-                                None => "",
-                            };
+                            let article_type = article_type.clone();
                             let article_id = article_id.clone();
-                            if current_path == "blog" {
+                            if article_type == "blog" {
                                 history.push(ViewBlogRoute::View { id: article_id });
-                            } else if current_path == "work" {
+                            } else if article_type == "work" {
                                 history.push(ViewWorkRoute::View { id: article_id });
                             }
                         }
@@ -293,16 +289,18 @@ pub fn card(props: &RenderedAtProps) -> Html {
                     let card = html! {
                         <div class="card" >
                             <img onclick={go_view} src={article_content.thumbnail}/>
-                            <time>{article_content.updated_at}</time>
-                            <h1>{article_content.title}</h1>
+                            <time class="small-text">{article_content.updated_at}</time>
+                            <h2>{article_content.title}</h2>
                             if is_signed {
-                                <button onclick={edit_article}>{"Edit"}</button>
-                                <button onclick={del_article}>{"Delete"}</button>
-                                if article_content.released {
-                                    <button onclick={change_released}>{"Public"}</button>
-                                } else {
-                                    <button onclick={change_released}>{"Private"}</button>
-                                }
+                                <div class="card-buttons">
+                                    <button onclick={edit_article}>{"Edit"}</button>
+                                    <button onclick={del_article}>{"Delete"}</button>
+                                    if article_content.released {
+                                        <button onclick={change_released}>{"Public"}</button>
+                                    } else {
+                                        <button onclick={change_released}>{"Private"}</button>
+                                    }
+                                </div>
                             }
                         </div>
                     };

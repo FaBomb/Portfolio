@@ -10,18 +10,24 @@ pub fn header() -> Html {
 
     let history = use_history().unwrap();
     let go_home = Callback::from(move |_| history.push(AppRoute::Home));
+
     let history = use_history().unwrap();
     let go_blog = Callback::from(move |_| {
         history.push(BlogRoute::Blog {
             page: "1".to_string(),
         })
     });
+
     let history = use_history().unwrap();
     let go_work = Callback::from(move |_| {
         history.push(WorkRoute::Work {
             page: "1".to_string(),
         })
     });
+
+    let history = use_history().unwrap();
+    let go_profile = Callback::from(move |_| history.push(AppRoute::Profile));
+
     let history = use_history().unwrap();
     let go_new_blog = Callback::from(move |_| {
         history.push(AdminBlogRoute::AdminArticleEdit {
@@ -84,40 +90,46 @@ pub fn header() -> Html {
 
     html! {
         <header>
-            <h2>{ "Header" }</h2>
+            <div class="logo-box" onclick={go_home}>
+                <img src="images/logo-opacity.svg" alt="ロゴ画像" />
+            </div>
             <nav>
                 if current_path_name == "" {
                     <button onclick={go_blog}>{ "Blog" }</button>
                     <button onclick={go_work}>{ "Work" }</button>
+                    <button onclick={go_profile}>{ "Profile" }</button>
                 } else if current_path_name == "blog" {
-                    <button onclick={go_home}>{ "Home" }</button>
                     <button onclick={go_work}>{ "Work" }</button>
+                    <button onclick={go_profile}>{ "Profile" }</button>
                     if *is_signed {
                         <button onclick={go_new_blog}>{ "NewBlog" }</button>
                         <button onclick={go_new_work}>{ "NewWork" }</button>
                         <button onclick={onclick_sign_out}>{ "SignOut" }</button>
                     }
                 } else if current_path_name == "work" {
-                    <button onclick={go_home}>{ "Home" }</button>
                     <button onclick={go_blog}>{ "Blog" }</button>
+                    <button onclick={go_profile}>{ "Profile" }</button>
                     if *is_signed {
                         <button onclick={go_new_blog}>{ "NewBlog" }</button>
                         <button onclick={go_new_work}>{ "NewWork" }</button>
                         <button onclick={onclick_sign_out}>{ "SignOut" }</button>
                     }
-                } else if current_path_name == "admin" {
-                    <button onclick={go_home}>{ "Home" }</button>
+                } else if current_path_name == "profile" {
                     <button onclick={go_blog}>{ "Blog" }</button>
                     <button onclick={go_work}>{ "Work" }</button>
+                } else if current_path_name == "admin" {
+                    <button onclick={go_blog}>{ "Blog" }</button>
+                    <button onclick={go_work}>{ "Work" }</button>
+                    <button onclick={go_profile}>{ "Profile" }</button>
                     if *is_signed {
                         <button onclick={go_new_blog}>{ "NewBlog" }</button>
                         <button onclick={go_new_work}>{ "NewWork" }</button>
                         <button onclick={onclick_sign_out}>{ "SignOut" }</button>
                     }
                 } else {
-                    <button onclick={go_home}>{ "Home" }</button>
                     <button onclick={go_blog}>{ "Blog" }</button>
                     <button onclick={go_work}>{ "Work" }</button>
+                    <button onclick={go_profile}>{ "Profile" }</button>
                 }
             </nav>
         </header>
