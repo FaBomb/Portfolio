@@ -44,8 +44,8 @@ pub fn home() -> Html {
                 </div>
             </div>
             <div class="home-work">
-                <h2><a onclick={go_work.clone()}>{ "- Work -" }</a></h2>
-                <p class="small-text sub-text">{"作品"}</p>
+                <h2><a onclick={go_work.clone()}>{ "- Works -" }</a></h2>
+                <p class="small-text sub-text">{"過去に制作した作品"}</p>
                 <div class="cards">
                     <Card current_page={1} limit_num={4} article_type={"work"} is_signed={false}/>
                 </div>
@@ -62,14 +62,14 @@ pub fn home() -> Html {
             <div class="home-profile">
                 <h2><a onclick={go_profile.clone()}>{ "- Profile -" }</a></h2>
                 <p class="small-text sub-text">{"プロフィール"}</p>
-                <div class="home-profile-box">
+                <div class="profile-box">
                     <img src="images/profile.jpg" alt="プロフィール画像" />
-                    <dl class="home-row">
+                    <dl>
                         <dt>{"Name"}</dt>
                         <dd>{"Yuta Toyomi"}</dd>
                         <dt>{"Birthday"}</dt>
                         <dd>{"12.31.1997"}</dd>
-                        <dt>{"Occupation"}</dt>
+                        <dt>{"Job"}</dt>
                         <dd>{"Web Engineer"}</dd>
                     </dl>
                 </div>

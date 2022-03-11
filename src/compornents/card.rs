@@ -151,9 +151,9 @@ pub fn card(props: &RenderedAtProps) -> Html {
 
                         let card = html! {
                             <div class="card" >
-                                <img onclick={go_view} src={article_content.thumbnail}/>
+                                <img onclick={go_view.clone()} src={article_content.thumbnail}/>
                                 <time class="small-text">{article_content.updated_at}</time>
-                                <h2>{article_content.title}</h2>
+                                <h2 onclick={go_view}>{article_content.title}</h2>
                                 if is_signed_result {
                                     <div class="card-buttons">
                                         <button onclick={edit_article}>{"Edit"}</button>
@@ -288,9 +288,9 @@ pub fn card(props: &RenderedAtProps) -> Html {
 
                     let card = html! {
                         <div class="card" >
-                            <img onclick={go_view} src={article_content.thumbnail}/>
+                            <img onclick={go_view.clone()} src={article_content.thumbnail}/>
                             <time class="small-text">{article_content.updated_at}</time>
-                            <h2>{article_content.title}</h2>
+                            <h2 onclick={go_view}>{article_content.title}</h2>
                             if is_signed {
                                 <div class="card-buttons">
                                     <button onclick={edit_article}>{"Edit"}</button>

@@ -1,19 +1,27 @@
 import { store } from "./connect";
-import { fetch_unused, update_metadata, del_from_url } from "./storage";
+import { fetch_unused, update_metadata, unused_metadata, del_from_url } from "./storage";
 import { doc, updateDoc, setDoc, getDoc, deleteDoc,
          collection, addDoc, serverTimestamp, getDocs,
          query, orderBy, limit, startAt, where } from "firebase/firestore";
 
 const adjust_storage = async(used_urls: Array<string>) => {
     const unused_urls = await fetch_unused();
-    unused_urls.forEach(unused_url => {
+    if (unused_urls.length === 0) {
         used_urls.forEach(used_url => {
-            if (unused_url === used_url) {
-                update_metadata(used_url);
-            } else {
-                del_from_url(unused_url);
-            }
+            update_metadata(used_url);
         })
+    } else {
+        unused_urls.forEach(unused_url => {
+            used_urls.forEach(used_url => {
+                if (unused_url === used_url) {
+                    update_metadata(used_url);
+                }
+            })
+        })
+    }
+    const del_urls = await fetch_unused();
+    del_urls.forEach(unused_url => {
+        del_from_url(unused_url);
     })
 }
 
@@ -39,6 +47,15 @@ export const update_content = async(collect: string, article: string, id: string
         updated_at: serverTimestamp(),
     }
     const updateRef = doc(store, collect, id);
+    await getDoc(updateRef).then((doc) => {
+        const data = doc.data();
+        if (data) {
+            const images: Array<string> = data.article.images;
+            images.forEach(img => {
+                unused_metadata(img);
+            })
+        };
+    })
     await updateDoc (updateRef, docData).then(() => {
         adjust_storage(json_article.images);
         alert("Successful Update");

@@ -5,6 +5,7 @@ use js_bridge::fetch_article_content_from_id;
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
 use wasm_bindgen_futures::spawn_local;
+use yew::virtual_dom::VNode;
 use yew::{function_component, html, use_effect_with_deps, use_state, Properties};
 use yew_router::prelude::*;
 
@@ -81,15 +82,31 @@ pub fn view(props: &RenderedAtProps) -> Html {
         );
     }
 
+    let mut tags: Vec<VNode> = Vec::new();
+    for tag in &article.tags {
+        let tag = html! {
+            <li>{tag}</li>
+        };
+        tags.push(tag);
+    }
+
     let markdown_vnode = markdown(&article.content);
     html! {
         <>
             <Header/>
-            <h1>{ "View" }</h1>
             <div class="markdown view">
-                <img src={article.thumbnail.to_string()} alt="thumbnail" />
-                <h1>{&article.title}</h1>
-                {markdown_vnode}
+                <div class="title-box">
+                    <p class="small-text">
+                        <i class="fa-solid fa-clock"></i>
+                        {&article.updated_at}
+                    </p>
+                    <h1>{&article.title}</h1>
+                    <img src={article.thumbnail.to_string()} alt="thumbnail" class="thumbnail" />
+                    <ul>{tags}</ul>
+                </div>
+                <div class="content-box">
+                    {markdown_vnode}
+                </div>
             </div>
             <Footer/>
         </>

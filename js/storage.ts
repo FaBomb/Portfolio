@@ -4,7 +4,6 @@ import UUID from 'uuidjs';
 import imageCompression from "browser-image-compression";
 
 export const update_metadata = async(url: string) => {
-    console.log(url);
     const usedRef = ref(storage, url)
     const newMetadata = {
         customMetadata: {
@@ -13,6 +12,17 @@ export const update_metadata = async(url: string) => {
     };
     updateMetadata(usedRef, newMetadata).catch((error) => {
         console.error("update_metadata is error", error);
+    })
+}
+export const unused_metadata = async(url: string) => {
+    const usedRef = ref(storage, url)
+    const newMetadata = {
+        customMetadata: {
+          'used': "false",
+        }
+    };
+    updateMetadata(usedRef, newMetadata).catch((error) => {
+        console.error("unused_metadata is error", error);
     })
 }
 
@@ -64,7 +74,6 @@ export const fetch_unused = async():Promise<Array<string>> => {
     const unusedList:Array<string> = [];
     return new Promise(async (resolve) => {
         listAll(listRef).then((res) => {
-
             const responce = Promise.all(res.items.map(async itemRef => {
                 await getMetadata(itemRef).then((metadata) => {
                     if (metadata.customMetadata) {
@@ -94,7 +103,6 @@ export const del_from_url = async(url: string):Promise<boolean> => {
     const desertRef = ref(storage, url);
     const result = await new Promise<boolean>((resolve, reject) => {
         deleteObject(desertRef).then(() => {
-            console.log("deleted");
             resolve(true);
         }).catch((error) => {
             console.error("del_from_url is error", error);

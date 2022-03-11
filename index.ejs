@@ -3,10 +3,28 @@
     <head>
         <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# website: http://ogp.me/ns/website#">
+        <meta property="og:url" content="https://portfolio-7d273.web.app/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="FaBomb Portfolio" />
+        <meta property="og:description" content="FaBomb's Portfolio site" />
+        <meta property="og:site_name" content="FaBomb" />
+        <meta property="og:image" content="images/favicon.png" />
         <link rel="icon" type="image/png" href="images/favicon.png">
         <title>FaBomb</title>
         <base href="/">
+        <script src="https://kit.fontawesome.com/ece61d8771.js" crossorigin="anonymous"></script>
         <%= scripts %>
+        <script>
+            (function(d) {
+              var config = {
+                kitId: 'jlk6dat',
+                scriptTimeout: 3000,
+                async: true
+              },
+              h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+            })(document);
+          </script>
     </head>
     <body></body>
 </html>

@@ -103,7 +103,7 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
     let title = use_state(|| "".to_string());
     let text = use_state(|| "".to_string());
     let thumbnail = use_state(|| {
-        "https://firebasestorage.googleapis.com/v0/b/portfolio-7d273.appspot.com/o/images%2F1d7069c1-72ef-411b-8fc8-fc1e11f81988.jpeg?alt=media&token=416872f1-8581-48df-af2b-07387077f7d8"
+        "https://firebasestorage.googleapis.com/v0/b/portfolio-7d273.appspot.com/o/no-img.png?alt=media&token=a49234a7-66c8-4984-92fb-c9495be490ab"
         .to_string()
     });
 
@@ -126,6 +126,8 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
     let pulldown_category_option_vnode =
         pulldown_options(categories.to_vec(), init_category.to_vec());
     let pulldown_tag_option_vnode = pulldown_options(tags.to_vec(), init_tags.to_vec());
+
+    // 編集のときは、読み込んだimagesのmetaデータをfalseに初期化する
     {
         let id = id.clone();
         let title_state = title.clone();
@@ -292,10 +294,11 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
                                 .unwrap()
                                 .as_str();
                             let image_url = image_url.split_at(image_url.len() - 1).0;
-                            let thumbnail_string = &*thumbnail;
                             save_urls.push(image_url.to_string());
-                            save_urls.push(thumbnail_string.to_string());
                         }
+                        let thumbnail_string = &*thumbnail;
+                        save_urls.push(thumbnail_string.to_string());
+
                         let text_string = &*text;
 
                         let select_tags_collection = select_tags.selected_options();

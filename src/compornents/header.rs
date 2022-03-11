@@ -96,10 +96,10 @@ pub fn header() -> Html {
             <nav>
                 if current_path_name == "" {
                     <button onclick={go_blog}>{ "Blog" }</button>
-                    <button onclick={go_work}>{ "Work" }</button>
+                    <button onclick={go_work}>{ "Works" }</button>
                     <button onclick={go_profile}>{ "Profile" }</button>
                 } else if current_path_name == "blog" {
-                    <button onclick={go_work}>{ "Work" }</button>
+                    <button onclick={go_work}>{ "Works" }</button>
                     <button onclick={go_profile}>{ "Profile" }</button>
                     if *is_signed {
                         <button onclick={go_new_blog}>{ "NewBlog" }</button>
@@ -116,10 +116,10 @@ pub fn header() -> Html {
                     }
                 } else if current_path_name == "profile" {
                     <button onclick={go_blog}>{ "Blog" }</button>
-                    <button onclick={go_work}>{ "Work" }</button>
+                    <button onclick={go_work}>{ "Works" }</button>
                 } else if current_path_name == "admin" {
                     <button onclick={go_blog}>{ "Blog" }</button>
-                    <button onclick={go_work}>{ "Work" }</button>
+                    <button onclick={go_work}>{ "Works" }</button>
                     <button onclick={go_profile}>{ "Profile" }</button>
                     if *is_signed {
                         <button onclick={go_new_blog}>{ "NewBlog" }</button>
@@ -128,7 +128,7 @@ pub fn header() -> Html {
                     }
                 } else {
                     <button onclick={go_blog}>{ "Blog" }</button>
-                    <button onclick={go_work}>{ "Work" }</button>
+                    <button onclick={go_work}>{ "Works" }</button>
                     <button onclick={go_profile}>{ "Profile" }</button>
                 }
             </nav>
