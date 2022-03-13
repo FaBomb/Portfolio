@@ -93,7 +93,7 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
     let mut article_type = id;
     let id = props.id.clone();
     if current_path == "admin_work" {
-        article_type = "work".to_string();
+        article_type = "works".to_string();
     } else if current_path == "admin_blog" {
         article_type = "blog".to_string();
     }
@@ -127,7 +127,6 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
         pulldown_options(categories.to_vec(), init_category.to_vec());
     let pulldown_tag_option_vnode = pulldown_options(tags.to_vec(), init_tags.to_vec());
 
-    // 編集のときは、読み込んだimagesのmetaデータをfalseに初期化する
     {
         let id = id.clone();
         let title_state = title.clone();
@@ -394,48 +393,80 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
     html! {
         <>
             <Header/>
-            <h1>{ article_type + " Edit" }</h1>
-            <label>
-                <input ref={thumbnail_ref} type="file" id="image-upload"
-                accept="image/png, image/jpeg" onchange={onchange_thumbnail} /> {"thumbnail"}
-            </label>
-            <label>
-                <input ref={file_ref} type="file" id="image-upload"
-                accept="image/png, image/jpeg, video/mp4" onchange={onchange_file} /> {"up"}
-            </label>
+            <div class="article-edit">
+                <h1>{"- "} { article_type } {" Edit -" }</h1>
+                <div class="support-tools">
+                    <div class="image-upload">
+                        <label>
+                            <input ref={thumbnail_ref} type="file" accept="image/png, image/jpeg"
+                             onchange={onchange_thumbnail} /> {"Thumbnail"}
+                        </label>
+                    </div>
+                    <div class="select-box">
+                        <h3>{"Category"}</h3>
+                        <label for="category-select">
+                            <div class="add-select">
+                                <input type="text" ref={new_category_ref}/>
+                                <button onclick={add_category}>{"+"}</button>
+                            </div>
+                            <div class="choose-select">
+                                <div class="selecter">
+                                    <select name="category" ref={select_category_ref} id="category-select">
+                                        <option value="" hidden={true}>{"- Select Category -"}</option>
+                                        {pulldown_category_option_vnode}
+                                    </select>
+                                </div>
+                                <button onclick={del_category}>{"-"}</button>
+                            </div>
+                        </label>
 
-            <label for="category-select">{"Category"}
-                <input type="text" ref={new_category_ref}/>
-                <button onclick={add_category}>{"+"}</button>
-                <select name="category" ref={select_category_ref} id="category-select">
-                    {pulldown_category_option_vnode}
-                </select>
-                <button onclick={del_category}>{"-"}</button>
-            </label>
-
-            <label for="tag-select">{"Tags"}
-                <input type="text" ref={new_tag_ref}/>
-                <button onclick={add_tag}>{"+"}</button>
-                <select name="tag" ref={select_tag_ref} multiple={true} id="tag-select">
-                    {pulldown_tag_option_vnode}
-                </select>
-                <button onclick={del_tag}>{"-"}</button>
-            </label>
-
-            <textarea ref={title_ref} oninput={oninput_title} value={title.to_string()} />
-            <div class="markdown">
-                <textarea ref={text_ref} oninput={oninput_value} value={text.to_string()} />
-                <div class="preview">
-                    <img src={thumbnail_string.to_string()} alt="thumbnail" />
-                    <h1>{title_string}</h1>
-                    {markdown_vnode}
+                        <h3>{"Tags"}</h3>
+                        <label for="tag-select">
+                            <div class="add-select">
+                                <input type="text" ref={new_tag_ref}/>
+                                <button onclick={add_tag}>{"+"}</button>
+                            </div>
+                            <div class="choose-select">
+                                <div class="selecter">
+                                    <select name="tag" ref={select_tag_ref} size="3" multiple={true} id="tag-select">
+                                        {pulldown_tag_option_vnode}
+                                    </select>
+                                </div>
+                                <button onclick={del_tag}>{"-"}</button>
+                            </div>
+                        </label>
+                        <h3>{"Title"}</h3>
+                        <textarea class="title-area" ref={title_ref} oninput={oninput_title} value={title.to_string()} />
+                    </div>
                 </div>
+                <div class="markdown">
+                    <div class="editor">
+                        <label>
+                            <input ref={file_ref} type="file" accept="image/png, image/jpeg, video/mp4"
+                            onchange={onchange_file} />{"Up Image"}
+                        </label>
+                        <textarea ref={text_ref} oninput={oninput_value} value={text.to_string()} />
+                    </div>
+                    <div class="view">
+                        <div class="title-box">
+                            <p class="small-text">
+                                <i class="fa-solid fa-clock"></i>
+                                {"20○○.○○.○○"}
+                            </p>
+                            <h1>{title_string}</h1>
+                            <img src={thumbnail_string.to_string()} alt="thumbnail" class="thumbnail" />
+                        </div>
+                        <div class="content-box">
+                            {markdown_vnode}
+                        </div>
+                    </div>
+                </div>
+                if id == "new" {
+                    <button onclick={post} class="post-btn">{"Post"}</button>
+                } else {
+                    <button onclick={post} class="post-btn">{"Edit"}</button>
+                }
             </div>
-            if id == "new" {
-                <button onclick={post}>{"投稿"}</button>
-            } else {
-                <button onclick={post}>{"編集"}</button>
-            }
             <Footer/>
         </>
     }

@@ -52,14 +52,10 @@ pub fn article(props: &RenderedAtProps) -> Html {
         <>
             <Header/>
             <div class="article">
-                if article_type.clone() == "work" {
-                    <h1>{"- "}{"works"}{" -"}</h1>
-                } else {
-                    <h1>{"- "}{article_type.clone()}{" -"}</h1>
-                }
+                <h1>{"- "}{article_type.clone()}{" -"}</h1>
                 if article_type == "blog" {
                     <p class="small-text">{"ブログ記事"}</p>
-                } else if article_type == "work" {
+                } else if article_type == "works" {
                     <p class="small-text">{"過去に制作した作品"}</p>
                 }
                 <div class="cards">

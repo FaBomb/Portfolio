@@ -106,7 +106,7 @@ pub fn header() -> Html {
                         <button onclick={go_new_work}>{ "NewWork" }</button>
                         <button onclick={onclick_sign_out}>{ "SignOut" }</button>
                     }
-                } else if current_path_name == "work" {
+                } else if current_path_name == "works" {
                     <button onclick={go_blog}>{ "Blog" }</button>
                     <button onclick={go_profile}>{ "Profile" }</button>
                     if *is_signed {

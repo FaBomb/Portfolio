@@ -12,7 +12,7 @@ pub enum AppRoute {
     AdminWorkPage,
     #[at("/blog/:s")]
     BlogPage,
-    #[at("/work/:s")]
+    #[at("/works/:s")]
     WorkPage,
     #[at("view_blog/:s")]
     ViewBlogPage,
@@ -74,9 +74,9 @@ pub enum BlogRoute {
 }
 #[derive(Clone, Routable, PartialEq)]
 pub enum WorkRoute {
-    #[at("/work/:page")]
+    #[at("/works/:page")]
     Work { page: String },
     #[not_found]
-    #[at("/work/404")]
+    #[at("/works/404")]
     NotFound,
 }

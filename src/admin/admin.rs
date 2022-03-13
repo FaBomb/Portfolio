@@ -62,15 +62,10 @@ pub fn admin() -> Html {
     html! {
         <>
             <Header/>
-            <div class="content">
-                <div id="form">
-                    <h1>{ "Home" }</h1>
-                    <div>
-                        <input ref={mail_address_ref} type="string" />
-                        <input ref={password_ref} type="password" />
-                        <button onclick={onclick_sign_in}>{ format!("Add input") }</button>
-                    </div>
-                </div>
+            <div class="sign-in">
+                <input ref={mail_address_ref} type="string" />
+                <input ref={password_ref} type="password" />
+                <button onclick={onclick_sign_in}>{ "Sign In" }</button>
             </div>
             <Footer/>
         </>

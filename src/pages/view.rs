@@ -53,7 +53,7 @@ pub fn view(props: &RenderedAtProps) -> Html {
     if current_path == "view_blog" {
         article_type = "blog".to_string();
     } else {
-        article_type = "work".to_string();
+        article_type = "works".to_string();
     }
 
     {
@@ -94,11 +94,12 @@ pub fn view(props: &RenderedAtProps) -> Html {
     html! {
         <>
             <Header/>
-            <div class="markdown view">
+            <div class="view">
                 <div class="title-box">
                     <p class="small-text">
                         <i class="fa-solid fa-clock"></i>
-                        {&article.updated_at}
+                        {&article.updated_at}<br/>
+                        {"- "}{&article.category}{" -"}
                     </p>
                     <h1>{&article.title}</h1>
                     <img src={article.thumbnail.to_string()} alt="thumbnail" class="thumbnail" />
