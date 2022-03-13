@@ -74,7 +74,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
                                 let article_id = article_id.clone();
                                 if article_type == "blog" {
                                     history.push(ViewBlogRoute::View { id: article_id });
-                                } else if article_type == "work" {
+                                } else if article_type == "works" {
                                     history.push(ViewWorkRoute::View { id: article_id });
                                 }
                             }
@@ -94,7 +94,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
                                 if current_path == "blog" {
                                     history
                                         .push(AdminBlogRoute::AdminArticleEdit { id: article_id });
-                                } else if current_path == "work" {
+                                } else if current_path == "works" {
                                     history
                                         .push(AdminWorkRoute::AdminArticleEdit { id: article_id });
                                 }
@@ -151,9 +151,9 @@ pub fn card(props: &RenderedAtProps) -> Html {
 
                         let card = html! {
                             <div class="card" >
-                                <img onclick={go_view} src={article_content.thumbnail}/>
+                                <img onclick={go_view.clone()} src={article_content.thumbnail}/>
                                 <time class="small-text">{article_content.updated_at}</time>
-                                <h2>{article_content.title}</h2>
+                                <h2 onclick={go_view}>{article_content.title}</h2>
                                 if is_signed_result {
                                     <div class="card-buttons">
                                         <button onclick={edit_article}>{"Edit"}</button>
@@ -213,7 +213,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
                             let article_id = article_id.clone();
                             if article_type == "blog" {
                                 history.push(ViewBlogRoute::View { id: article_id });
-                            } else if article_type == "work" {
+                            } else if article_type == "works" {
                                 history.push(ViewWorkRoute::View { id: article_id });
                             }
                         }
@@ -232,7 +232,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
                             };
                             if current_path == "blog" {
                                 history.push(AdminBlogRoute::AdminArticleEdit { id: article_id });
-                            } else if current_path == "work" {
+                            } else if current_path == "works" {
                                 history.push(AdminWorkRoute::AdminArticleEdit { id: article_id });
                             }
                         }
@@ -288,9 +288,9 @@ pub fn card(props: &RenderedAtProps) -> Html {
 
                     let card = html! {
                         <div class="card" >
-                            <img onclick={go_view} src={article_content.thumbnail}/>
+                            <img onclick={go_view.clone()} src={article_content.thumbnail}/>
                             <time class="small-text">{article_content.updated_at}</time>
-                            <h2>{article_content.title}</h2>
+                            <h2 onclick={go_view}>{article_content.title}</h2>
                             if is_signed {
                                 <div class="card-buttons">
                                     <button onclick={edit_article}>{"Edit"}</button>

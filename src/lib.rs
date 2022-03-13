@@ -108,7 +108,7 @@ fn switch_blog(route: &BlogRoute) -> Html {
 fn switch_work(route: &WorkRoute) -> Html {
     match route {
         WorkRoute::Work { page } => {
-            html! {<Article page={page.to_string()} article_type={"work".to_string()}/>}
+            html! {<Article page={page.to_string()} article_type={"works".to_string()}/>}
         }
         WorkRoute::NotFound => html! {
             <Redirect<AppRoute> to={AppRoute::NotFound}/>

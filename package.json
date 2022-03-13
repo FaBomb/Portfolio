@@ -24,7 +24,7 @@
   },
   "scripts": {
     "dev": "rm -rf public && wasm-pack build --out-dir dist --dev --out-name app && BUILD_MODE=dev webpack",
-    "build": "rm -rf public dist && wasm-pack build --release --out-dir dist --out-name app && webpack",
+    "build": "rm -rf public dist && wasm-pack build --release --out-dir dist --out-name app && webpack && firebase deploy",
     "serve": "rm -rf public && wasm-pack build --dev --out-dir dist --out-name app && BUILD_MODE=dev webpack && serve -s -p 8080 public"
   },
   "name": "folio",
