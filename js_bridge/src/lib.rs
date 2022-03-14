@@ -45,8 +45,19 @@ extern "C" {
         is_signed: bool,
     ) -> JsValue;
 
+    #[wasm_bindgen(js_name = "fetch_query_contents", js_namespace = ["window", "_wasm_js_bridge"])]
+    pub async fn fetch_query_contents(
+        query_name: String,
+        query_content: String,
+        index: u8,
+        limit_num: u8,
+    ) -> JsValue;
+
     #[wasm_bindgen(js_name = "fetch_article_size", js_namespace = ["window", "_wasm_js_bridge"])]
     pub async fn fetch_article_size(collection: String, is_signed: bool) -> JsValue;
+
+    #[wasm_bindgen(js_name = "fetch_query_size", js_namespace = ["window", "_wasm_js_bridge"])]
+    pub async fn fetch_query_size(query_name: String, query_content: String) -> JsValue;
 
     #[wasm_bindgen(js_name = "fetch_article_content_from_id", js_namespace = ["window", "_wasm_js_bridge"])]
     pub async fn fetch_article_content_from_id(collection: String, id: String) -> JsValue;

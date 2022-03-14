@@ -478,6 +478,9 @@ footer {
     img, video {
         max-width: 100%;
     }
+    p {
+        width: 100%;
+    }
     blockquote {
         border-left: 5px solid #ddd;
         color: #777;
@@ -500,6 +503,7 @@ footer {
         border-bottom: 2px solid $accent_color;
         padding-bottom: 6px;
         color: $accent_color;
+        width: 100%;
     }
     del {
         color: $sub_light_color;
@@ -641,6 +645,9 @@ footer {
     .content-box {
         width: 100%;
         display: inline;
+        table {
+            width: 100%;
+        }
     }
 }
 .article-edit {
@@ -881,8 +888,41 @@ footer {
         opacity: .8;
     }
 }
+.tag-box {
+    margin-top: 8rem;
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    .tags {
+        margin-top: 2rem;
+        display: flex;
+        flex-wrap: wrap;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        padding: 2rem;
+        a {
+            cursor: pointer;
+            padding: .2rem .8rem;
+            color: $sub_accent_color;
+            border: $sub_accent_color 1px solid;
+            margin: 1rem .5rem;
+            border-radius: 3px;
+        }
+        a:hover {
+            background-color: $sub_accent_color;
+            color: white;
+            transition: .4s;
+        }
+        a::after {
+            display: none;
+        }
+    }
+}
 
 @media screen and (max-width: 767px) {
+    .tag-box{
+        width: 90%;
+    }
     .article-edit {
         .support-tools {
             width: 80%;
@@ -890,7 +930,7 @@ footer {
         .markdown {
             flex-direction: column;
             align-items: center;
-            height: 100vh;
+            height: 100rem;
             .editor {
                 margin-bottom: 4rem;
                 textarea {

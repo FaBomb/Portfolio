@@ -78,6 +78,11 @@ pub struct RenderedAtProps {
     pub id: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct Tags {
+    tags: Vec<String>,
+}
+
 #[function_component(AdminArticleEdit)]
 pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
     let id = props.id.clone();
@@ -174,14 +179,30 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
                         }
                     }
 
-                    let categories_value = fetch_categories().await.as_string().unwrap();
+                    let categories_value = fetch_categories().await.as_string();
+                    let categories_value = match categories_value {
+                        Some(categories) => categories,
+                        None => "".to_string(),
+                    };
                     let categories_vec: Result<Vec<String>> =
                         serde_json::from_str(&categories_value);
-                    categories.set(categories_vec.unwrap());
+                    let categories_vec = match categories_vec {
+                        Ok(categories) => categories,
+                        Err(_) => vec![],
+                    };
+                    categories.set(categories_vec);
 
-                    let tags_value = fetch_tags().await.as_string().unwrap();
-                    let tags_vec: Result<Vec<String>> = serde_json::from_str(&tags_value);
-                    tags.set(tags_vec.unwrap());
+                    let tags_value = fetch_tags().await.as_string();
+                    let tags_value = match tags_value {
+                        Some(tags) => tags,
+                        None => "".to_string(),
+                    };
+                    let tags_result: Result<Tags> = serde_json::from_str(&tags_value);
+                    let tags_result = match tags_result {
+                        Ok(tags) => tags,
+                        Err(_) => Tags { tags: vec![] },
+                    };
+                    tags.set(tags_result.tags);
                 });
                 || ()
             },
@@ -412,7 +433,6 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
                             <div class="choose-select">
                                 <div class="selecter">
                                     <select name="category" ref={select_category_ref} id="category-select">
-                                        <option value="" hidden={true}>{"- Select Category -"}</option>
                                         {pulldown_category_option_vnode}
                                     </select>
                                 </div>

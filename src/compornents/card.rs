@@ -1,5 +1,7 @@
 use crate::routing::{AdminBlogRoute, AdminWorkRoute, ViewBlogRoute, ViewWorkRoute};
-use js_bridge::{del_content, fetch_article_contents, is_signed_in, update_released};
+use js_bridge::{
+    del_content, fetch_article_contents, fetch_query_contents, is_signed_in, update_released,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
 use wasm_bindgen_futures::spawn_local;
@@ -26,6 +28,7 @@ pub struct RenderedAtProps {
     pub limit_num: u8,
     pub article_type: String,
     pub is_signed: bool,
+    pub query_content: String,
 }
 
 #[function_component(Card)]
@@ -37,6 +40,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
     let current_page = use_state(|| props.current_page);
     let article_type = props.article_type.clone();
     let is_signed = props.is_signed.clone();
+    let query_content = props.query_content.clone();
 
     {
         let card_vnode = card_vnode.clone();
@@ -45,23 +49,45 @@ pub fn card(props: &RenderedAtProps) -> Html {
         let limit_num = props.limit_num.clone();
         let history = history.clone();
         let article_type = article_type.clone();
+        let query_content = query_content.clone();
         use_effect_with_deps(
             move |_| {
                 spawn_local(async move {
                     let is_signed_result = is_signed_in("_").await.as_bool().unwrap();
-                    let article_contents_value = fetch_article_contents(
-                        article_type.clone(),
-                        props_current_page,
-                        limit_num,
-                        is_signed_result,
-                    )
-                    .await
-                    .as_string()
-                    .unwrap();
+                    let article_contents_value;
+                    if article_type == "tag" {
+                        article_contents_value = fetch_query_contents(
+                            article_type.clone(),
+                            query_content,
+                            props_current_page,
+                            limit_num,
+                        )
+                        .await
+                        .as_string();
+                    } else {
+                        article_contents_value = fetch_article_contents(
+                            article_type.clone(),
+                            props_current_page,
+                            limit_num,
+                            is_signed_result,
+                        )
+                        .await
+                        .as_string();
+                    }
+                    let article_contents_value = match article_contents_value {
+                        Some(article_content) => article_content,
+                        None => "".to_string(),
+                    };
                     let article_contents_result: Result<Vec<Article>> =
                         serde_json::from_str(&article_contents_value);
+
+                    let article_contents_result = match article_contents_result {
+                        Ok(article_contents) => article_contents,
+                        Err(_) => vec![],
+                    };
                     let mut vnode: Vec<VNode> = Vec::new();
-                    for article_content in article_contents_result.unwrap() {
+
+                    for article_content in article_contents_result {
                         let article_id = article_content.id.clone();
                         let article_content_string =
                             serde_json::to_string(&article_content.clone()).unwrap();
@@ -72,7 +98,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
                             move |_| {
                                 let article_type = article_type.clone();
                                 let article_id = article_id.clone();
-                                if article_type == "blog" {
+                                if article_type == "blog" || article_type == "tag" {
                                     history.push(ViewBlogRoute::View { id: article_id });
                                 } else if article_type == "works" {
                                     history.push(ViewWorkRoute::View { id: article_id });
@@ -185,22 +211,45 @@ pub fn card(props: &RenderedAtProps) -> Html {
         let current_page = current_page.clone();
         let article_type = article_type.clone();
         let is_signed = is_signed.clone();
+        let query_content = query_content.clone();
         move |_| {
             spawn_local(async move {
-                let article_contents_value = fetch_article_contents(
-                    article_type.clone(),
-                    props_current_page,
-                    limit_num,
-                    is_signed,
-                )
-                .await
-                .as_string()
-                .unwrap();
+                let article_contents_value;
+                if article_type == "tag" {
+                    article_contents_value = fetch_query_contents(
+                        article_type.clone(),
+                        query_content,
+                        props_current_page,
+                        limit_num,
+                    )
+                    .await
+                    .as_string();
+                } else {
+                    article_contents_value = fetch_article_contents(
+                        article_type.clone(),
+                        props_current_page,
+                        limit_num,
+                        is_signed,
+                    )
+                    .await
+                    .as_string();
+                }
+
+                let article_contents_value = match article_contents_value {
+                    Some(article_content) => article_content,
+                    None => "".to_string(),
+                };
                 let article_contents_result: Result<Vec<Article>> =
                     serde_json::from_str(&article_contents_value);
+
+                let article_contents_result = match article_contents_result {
+                    Ok(article_contents) => article_contents,
+                    Err(_) => vec![],
+                };
+
                 let mut vnode: Vec<VNode> = Vec::new();
 
-                for article_content in article_contents_result.unwrap() {
+                for article_content in article_contents_result {
                     let article_id = article_content.id.clone();
                     let article_content_string =
                         serde_json::to_string(&article_content.clone()).unwrap();
@@ -211,7 +260,7 @@ pub fn card(props: &RenderedAtProps) -> Html {
                         move |_| {
                             let article_type = article_type.clone();
                             let article_id = article_id.clone();
-                            if article_type == "blog" {
+                            if article_type == "blog" || article_type == "tag" {
                                 history.push(ViewBlogRoute::View { id: article_id });
                             } else if article_type == "works" {
                                 history.push(ViewWorkRoute::View { id: article_id });
