@@ -46,15 +46,22 @@ pub fn header() -> Html {
     let path_name = history.location().pathname();
     let path_name_vec: Vec<&str> = path_name.split('/').collect();
     let some_path_name = path_name_vec.get(1);
-    // let some_admin_path_name = path_name_vec.get(2);
     let current_path_name = match some_path_name {
         Some(path) => path,
         None => "",
     };
-    // let current_admin_path_name = match some_admin_path_name {
-    //     Some(path) => path,
-    //     None => "",
-    // };
+
+    let mut query: String = history.location().search();
+    let mut query_name: String = "".to_string();
+    if query.len() > 1 {
+        query.remove(0);
+        let query_vec: Vec<&str> = query.split('=').collect();
+        let some_query_name = query_vec.get(0);
+        query_name = match some_query_name {
+            Some(query) => query.to_string(),
+            None => "".to_string(),
+        };
+    }
 
     let onclick_sign_out = {
         let is_signed = is_signed.clone();
@@ -95,6 +102,10 @@ pub fn header() -> Html {
             </div>
             <nav>
                 if current_path_name == "" {
+                    <button onclick={go_blog}>{ "Blog" }</button>
+                    <button onclick={go_work}>{ "Works" }</button>
+                    <button onclick={go_profile}>{ "Profile" }</button>
+                } else if query_name == "tag" {
                     <button onclick={go_blog}>{ "Blog" }</button>
                     <button onclick={go_work}>{ "Works" }</button>
                     <button onclick={go_profile}>{ "Profile" }</button>

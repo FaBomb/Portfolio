@@ -47,7 +47,8 @@ pub fn home() -> Html {
                 <h2><a onclick={go_work.clone()}>{ "- Works -" }</a></h2>
                 <p class="small-text sub-text">{"過去に制作した作品"}</p>
                 <div class="cards">
-                    <Card current_page={1} limit_num={4} article_type={"works"} is_signed={false}/>
+                    <Card current_page={1} limit_num={4} article_type={"works"}
+                    is_signed={false} query_content={"".to_string()} />
                 </div>
                 <a onclick={go_work} class="detail">{"- more -"}</a>
             </div>
@@ -55,7 +56,8 @@ pub fn home() -> Html {
                 <h2><a onclick={go_blog.clone()}>{ "- Blog -" }</a></h2>
                 <p class="small-text sub-text">{"ブログ記事"}</p>
                 <div class="cards">
-                    <Card current_page={1} limit_num={4} article_type={"blog"} is_signed={false}/>
+                    <Card current_page={1} limit_num={4} article_type={"blog"}
+                    is_signed={false} query_content={"".to_string()}/>
                 </div>
                 <a onclick={go_blog} class="detail">{"- more -"}</a>
             </div>

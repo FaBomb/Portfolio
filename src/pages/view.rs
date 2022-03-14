@@ -1,6 +1,6 @@
 use crate::admin::admin_article_edit::markdown;
 use crate::compornents::{footer::Footer, header::Header};
-use crate::routing::AppRoute;
+use crate::routing::{AppRoute, BlogRoute};
 use js_bridge::fetch_article_content_from_id;
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
@@ -24,6 +24,10 @@ struct Article {
     released: bool,
     images: Vec<String>,
     updated_at: String,
+}
+#[derive(Serialize, Deserialize, Debug)]
+struct Tag {
+    tag: String,
 }
 
 #[function_component(View)]
@@ -84,8 +88,24 @@ pub fn view(props: &RenderedAtProps) -> Html {
 
     let mut tags: Vec<VNode> = Vec::new();
     for tag in &article.tags {
+        let go_tag = {
+            let history = use_history().unwrap();
+            let tag = tag.clone();
+            move |_| {
+                let history = history.clone();
+                let tag_struct = Tag { tag: tag.clone() };
+                history
+                    .push_with_query(
+                        BlogRoute::Blog {
+                            page: "1".to_string(),
+                        },
+                        tag_struct,
+                    )
+                    .unwrap()
+            }
+        };
         let tag = html! {
-            <li>{tag}</li>
+            <li onclick={go_tag}>{tag}</li>
         };
         tags.push(tag);
     }

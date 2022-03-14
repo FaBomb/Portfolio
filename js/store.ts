@@ -32,7 +32,28 @@ export const set_content = async(collect: string, article: string) => {
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
     }
-    await addDoc(collection(store, collect), docData).then(() => {
+    await addDoc(collection(store, collect), docData).then((snapshot) => {
+        // const id = snapshot.id;
+        // json_article.tags.forEach((tag: string) => {
+        //     const tagRef = doc(store, "tag", tag);
+        //     getDoc(tagRef).then((doc) => {
+        //         console.log(id)
+        //         const data = doc.data();
+        //         if (data) {
+        //             console.log(data.articles)
+        //             const articles = data.articles;
+        //             articles.push(id)
+        //             const newData = {
+        //                 articles: articles,
+        //             }
+        //             updateDoc (tagRef, newData).catch((error) => {
+        //                 console.error("update tag is error", error);
+        //             });
+        //         }
+        //     }).catch(e => {
+        //         console.error(e);
+        //     })
+        // })
         adjust_storage(json_article.images);
         alert("Successful Posting");
     }).catch((error) => {
@@ -56,7 +77,7 @@ export const update_content = async(collect: string, article: string, id: string
             })
         };
     })
-    await updateDoc (updateRef, docData).then(() => {
+    await updateDoc(updateRef, docData).then(() => {
         adjust_storage(json_article.images);
         alert("Successful Update");
     }).catch((error) => {
@@ -70,7 +91,38 @@ export const update_released = async(collect: string, article: string, id: strin
         article: json_article,
     }
     const updateRef = doc(store, collect, id);
-    await updateDoc (updateRef, docData).then(() => {
+    
+    await getDoc(updateRef).then((snapshot) => {
+        const data = snapshot.data();
+        if (data) {
+            data.article.tags.forEach(async (tag: string) => {
+                const tagRef = doc(store, "tag", tag);
+                let articles: Array<string> = [];
+                await getDoc(tagRef).then(tagDoc => {
+                    const tagData = tagDoc.data();
+                    if (tagData) {
+                        articles = tagData.articles;
+                    }
+                })
+                if (json_article.released) {
+                    articles.push(id);
+                } else {
+                    articles = articles.filter((article) => {
+                        return article !== id;
+                    })
+                }
+                const updateArticles = {
+                    articles: articles,
+                }
+                console.log(updateArticles)
+                await updateDoc(tagRef, updateArticles).catch((error) => {
+                    console.error("update_tag_content is error", error);
+                });
+            })
+        };
+    })
+    await updateDoc(updateRef, docData).then(() => {
+        console.log()
         if (json_article.released) {
             alert("Public");
         } else {
@@ -93,7 +145,7 @@ export const set_category = async(category: string) => {
 }
 export const set_tag = async(tag: string) => {
     const tagData = {
-        tag: tag,
+        articles: [],
     }
     await setDoc(doc(store, "tag", tag), tagData).then((docRef) => {
         alert("Save tag");
@@ -129,7 +181,7 @@ export const fetch_categories = async():Promise<string> => {
     const categories:Array<string> = [];
     await getDocs(collection(store, "category")).then((docs) => {
         docs.docs.forEach(doc => {
-            categories.push(doc.data().category);
+            categories.push(doc.id);
         })
     }).catch((error) => {
         console.error("fetch_categories is error", error);
@@ -142,17 +194,19 @@ export const fetch_tags = async():Promise<string> => {
     const tags:Array<string> = [];
     await getDocs(collection(store, "tag")).then((docs) => {
         docs.docs.forEach(doc => {
-            tags.push(doc.data().tag);
+            tags.push(doc.id);
         })
     }).catch((error) => {
         console.error("fetch_tags is error", error);
     });
-    const tags_json = JSON.stringify(tags);
+    const tag_text = {
+        tags: tags
+    }
+    const tags_json = JSON.stringify(tag_text);
     return tags_json;
 }
 
 export const fetch_article_size = async(collect:string, is_signed: boolean):Promise<number> => {
-    
     let article_size: number = 0;
     if (is_signed) {
         await getDocs(collection(store, collect)).then((snapshot) => {
@@ -170,6 +224,20 @@ export const fetch_article_size = async(collect:string, is_signed: boolean):Prom
         })
     }
     return article_size;
+}
+export const fetch_query_size = async(query_name: string, query_content: string):Promise<number> => {
+    let query_size: number = 0;
+    const queryRef = doc(store, query_name, query_content);
+    await getDoc(queryRef).then((queryDoc) => {
+        const queryData = queryDoc.data();
+        if (queryData) {
+            const articles = queryData.articles;
+            query_size = articles.length;
+        }
+    }).catch((e) => {
+        console.error(e);
+    })
+    return query_size;
 }
 
 export const fetch_article_contents = async(collect:string, index: number, limit_num: number, is_signed: boolean):Promise<string> => {
@@ -195,8 +263,17 @@ export const fetch_article_contents = async(collect:string, index: number, limit
         first = query(articleRef, where("article.released", "==", true),
                 orderBy("created_at", "desc"), limit(start_index + 1));
     }
-    const documentSnapshots = await getDocs(first);
-    const lastVisible = documentSnapshots.docs[documentSnapshots.docs.length-1];
+
+    let lastVisible;
+    await getDocs(first).then((documentSnapshots) => {
+        lastVisible = documentSnapshots.docs[documentSnapshots.docs.length-1];
+    }).catch((error) => {
+        console.error("get first docs is error", error);
+    });
+    if (lastVisible === undefined) {
+        const article_contents_json = JSON.stringify("");
+        return article_contents_json;
+    };
 
     let q;
     if (is_signed) {
@@ -230,6 +307,63 @@ export const fetch_article_contents = async(collect:string, index: number, limit
         })
     }).catch((error) => {
         console.error("fetch_article_contents is error", error);
+    });
+    const article_contents_json = JSON.stringify(articles);
+    return article_contents_json;
+}
+export const fetch_query_contents = async(query_name:string, query_content:string, index: number, limit_num: number):Promise<string> => {
+    const start_index: number = limit_num * (index - 1);
+    const articles: Array<Article> = [];
+    interface Article{
+        id: string,
+        content: string,
+        tags: Array<string>,
+        category: string,
+        released: boolean,
+        title: string,
+        thumbnail: string,
+        images: Array<string>,
+        updated_at: string,
+    }
+
+    const queryRef = doc(store, query_name, query_content);
+    
+    await getDoc(queryRef).then(async (queryDoc) => {
+            const queryData = queryDoc.data();
+            if (queryData) {
+                const article_array = queryData.articles.reverse();
+                let sliced_articles;
+                if (article_array.length < start_index+limit_num) {
+                    sliced_articles = article_array.slice(start_index);
+                } else {
+                    sliced_articles = article_array.slice(start_index, start_index+limit_num);
+                }
+                for (const article of sliced_articles) {
+                    const articleRef = doc(store, "blog", article);
+                    await getDoc(articleRef).then((articleDoc) => {
+                        const articleData = articleDoc.data({ serverTimestamps: "estimate" });
+                        if (articleData) {
+                            const year = articleData.updated_at.toDate().getFullYear();
+                            const month = articleData.updated_at.toDate().getMonth()+1;
+                            const date = articleData.updated_at.toDate().getDate();
+                            const article: Article = {
+                                id: articleDoc.id,
+                                content: articleData.article.content,
+                                tags: articleData.article.tags,
+                                category: articleData.article.category,
+                                released: articleData.article.released,
+                                title: articleData.article.title,
+                                thumbnail: articleData.article.thumbnail,
+                                images: articleData.article.images,
+                                updated_at: [year, month, date].join("."),
+                            }
+                            articles.push(article);
+                        }
+                    })
+                }
+            }
+    }).catch((error) => {
+        console.error("fetch_query_contents is error", error);
     });
     const article_contents_json = JSON.stringify(articles);
     return article_contents_json;

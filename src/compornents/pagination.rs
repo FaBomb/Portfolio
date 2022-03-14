@@ -1,4 +1,5 @@
 use crate::routing::{BlogRoute, WorkRoute};
+use serde::{Deserialize, Serialize};
 use yew::virtual_dom::VNode;
 use yew::{function_component, html, Properties};
 use yew_router::prelude::*;
@@ -8,6 +9,11 @@ pub struct RenderedAtProps {
     pub article_type: String,
     pub current_page: u8,
     pub page_size: u8,
+    pub query_content: String,
+}
+#[derive(Serialize, Deserialize, Debug)]
+struct Tag {
+    tag: String,
 }
 
 #[function_component(Pagination)]
@@ -15,21 +21,36 @@ pub fn pagination(props: &RenderedAtProps) -> Html {
     let mut pagination: Vec<VNode> = Vec::new();
     let article_type = props.article_type.clone();
     let current_page = props.current_page.clone();
+    let query_content = props.query_content.clone();
 
     let back_page = {
         let history = use_history().unwrap();
         let article_type = article_type.clone();
         let current_page = current_page.clone();
+        let query_content = query_content.clone();
         move |_| {
+            let query_content = query_content.clone();
             let next_page = current_page - 1;
             if article_type == "blog" {
                 history.push(BlogRoute::Blog {
                     page: next_page.to_string(),
                 });
-            } else {
+            } else if article_type == "works" {
                 history.push(WorkRoute::Work {
                     page: next_page.to_string(),
                 });
+            } else if article_type == "tag" {
+                let tag_struct = Tag {
+                    tag: query_content.clone(),
+                };
+                history
+                    .push_with_query(
+                        BlogRoute::Blog {
+                            page: next_page.to_string(),
+                        },
+                        tag_struct,
+                    )
+                    .unwrap();
             }
         }
     };
@@ -38,16 +59,28 @@ pub fn pagination(props: &RenderedAtProps) -> Html {
         let history = use_history().unwrap();
         let article_type = article_type.clone();
         let current_page = current_page.clone();
+        let query_content = query_content.clone();
         move |_| {
+            let query_content = query_content.clone();
             let next_page = current_page + 1;
             if article_type == "blog" {
                 history.push(BlogRoute::Blog {
                     page: next_page.to_string(),
                 });
-            } else {
+            } else if article_type == "works" {
                 history.push(WorkRoute::Work {
                     page: next_page.to_string(),
                 });
+            } else if article_type == "tag" {
+                let tag_struct = Tag { tag: query_content };
+                history
+                    .push_with_query(
+                        BlogRoute::Blog {
+                            page: next_page.to_string(),
+                        },
+                        tag_struct,
+                    )
+                    .unwrap();
             }
         }
     };
@@ -56,15 +89,27 @@ pub fn pagination(props: &RenderedAtProps) -> Html {
         let page_change = {
             let history = use_history().unwrap();
             let article_type = article_type.clone();
+            let query_content = query_content.clone();
             move |_| {
+                let query_content = query_content.clone();
                 if article_type == "blog" {
                     history.push(BlogRoute::Blog {
                         page: page.to_string(),
                     });
-                } else {
+                } else if article_type == "works" {
                     history.push(WorkRoute::Work {
                         page: page.to_string(),
                     });
+                } else if article_type == "tag" {
+                    let tag_struct = Tag { tag: query_content };
+                    history
+                        .push_with_query(
+                            BlogRoute::Blog {
+                                page: page.to_string(),
+                            },
+                            tag_struct,
+                        )
+                        .unwrap();
                 }
             }
         };
