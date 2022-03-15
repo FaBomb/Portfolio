@@ -32,28 +32,7 @@ export const set_content = async(collect: string, article: string) => {
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
     }
-    await addDoc(collection(store, collect), docData).then((snapshot) => {
-        // const id = snapshot.id;
-        // json_article.tags.forEach((tag: string) => {
-        //     const tagRef = doc(store, "tag", tag);
-        //     getDoc(tagRef).then((doc) => {
-        //         console.log(id)
-        //         const data = doc.data();
-        //         if (data) {
-        //             console.log(data.articles)
-        //             const articles = data.articles;
-        //             articles.push(id)
-        //             const newData = {
-        //                 articles: articles,
-        //             }
-        //             updateDoc (tagRef, newData).catch((error) => {
-        //                 console.error("update tag is error", error);
-        //             });
-        //         }
-        //     }).catch(e => {
-        //         console.error(e);
-        //     })
-        // })
+    await addDoc(collection(store, collect), docData).then(() => {
         adjust_storage(json_article.images);
         alert("Successful Posting");
     }).catch((error) => {

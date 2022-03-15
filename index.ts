@@ -1,4 +1,5 @@
-import "./assets/favicon.png"
+import "./assets/favicon.ico"
+import "./assets/logo-full.png"
 import "./assets/logo.svg"
 import "./assets/logo-opacity.svg"
 import "./assets/profile.jpg"
