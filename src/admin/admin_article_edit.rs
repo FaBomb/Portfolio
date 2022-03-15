@@ -245,18 +245,32 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
                         let file_type = file.type_().to_string();
                         let result = upload(file).await;
                         let result = result.as_string().unwrap();
-                        let insert_index = text_element.selection_start().unwrap().unwrap();
+                        let insert_index: u32 = match text_element.selection_start() {
+                            Ok(index_option) => match index_option {
+                                Some(index) => index,
+                                None => 0,
+                            },
+                            Err(_) => 0,
+                        };
                         let text_value = text_element.value();
-                        let before = &text_value[..(insert_index) as usize];
-                        let after = &text_value[(insert_index) as usize..];
+                        let mut before_text = "".to_string();
+                        let mut after_text = "".to_string();
+                        for (i, text) in text_value.chars().enumerate() {
+                            if i < insert_index as usize {
+                                before_text.push(text);
+                            } else {
+                                after_text.push(text);
+                            }
+                        }
                         if file_type == "video/mp4" {
-                            let video_url = ["\n<video src='", "' controls></video>"].join(&result);
-                            let new_text = [before, after].join(&video_url);
+                            let video_url =
+                                ["\n<video src='", "' controls></video>\n"].join(&result);
+                            let new_text = [before_text, after_text].join(&video_url);
                             text_element.set_value(&new_text);
                             text.set(new_text);
                         } else {
-                            let image_url = ["\n![image_name](", ")"].join(&result);
-                            let new_text = [before, after].join(&image_url);
+                            let image_url = ["\n![image_name](", ")\n"].join(&result);
+                            let new_text = [before_text, after_text].join(&image_url);
                             text_element.set_value(&new_text);
                             text.set(new_text);
                         }
