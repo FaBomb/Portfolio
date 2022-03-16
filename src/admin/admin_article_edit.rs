@@ -241,10 +241,23 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
             if let Some(file) = file_ref.cast::<HtmlInputElement>() {
                 if let Some(text_element) = text_ref.cast::<HtmlInputElement>() {
                     spawn_local(async move {
-                        let file = file.files().unwrap().item(0).unwrap();
-                        let file_type = file.type_().to_string();
-                        let result = upload(file).await;
-                        let result = result.as_string().unwrap();
+                        let files = file.files();
+                        let mut file_name: Option<web_sys::File> = None;
+                        let result = match files {
+                            Some(files) => match files.item(0) {
+                                Some(file) => {
+                                    file_name = Some(file.clone());
+                                    let result = upload(file).await;
+                                    result.as_string().unwrap()
+                                }
+                                None => "".to_string(),
+                            },
+                            None => "".to_string(),
+                        };
+                        let file_type = match file_name {
+                            Some(file) => file.type_().to_string(),
+                            None => "".to_string(),
+                        };
                         let insert_index: u32 = match text_element.selection_start() {
                             Ok(index_option) => match index_option {
                                 Some(index) => index,
@@ -268,7 +281,7 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
                             let new_text = [before_text, after_text].join(&video_url);
                             text_element.set_value(&new_text);
                             text.set(new_text);
-                        } else {
+                        } else if file_type != "" {
                             let image_url = ["\n![image_name](", ")\n"].join(&result);
                             let new_text = [before_text, after_text].join(&image_url);
                             text_element.set_value(&new_text);
