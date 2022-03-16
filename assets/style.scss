@@ -681,6 +681,9 @@ footer {
             margin-bottom: 2rem;
         }
         .select-box {
+            .works-edit {
+                display: none;
+            }
             .choose-select {
                 display: flex;
                 justify-content: center;
