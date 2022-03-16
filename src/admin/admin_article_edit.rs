@@ -330,6 +330,18 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
                             let image_url = image_url.split_at(image_url.len() - 1).0;
                             save_urls.push(image_url.to_string());
                         }
+                        let re_video_all =
+                            Regex::new(r"src='https?://[\w/:%#\$&\?\(\)~\.=\+\-]+").unwrap();
+                        for video_cap in re_video_all.captures_iter(&*text) {
+                            let video_url = video_cap.get(0).unwrap().as_str();
+                            let video_url: Vec<&str> = video_url.split("src='").collect();
+                            match video_url.get(1) {
+                                Some(url) => {
+                                    save_urls.push(url.to_string());
+                                }
+                                None => {}
+                            }
+                        }
                         let thumbnail_string = &*thumbnail;
                         save_urls.push(thumbnail_string.to_string());
 
