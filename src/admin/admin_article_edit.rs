@@ -454,7 +454,7 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
         <>
             <Header/>
             <div class="article-edit">
-                <h1>{"- "} { article_type } {" Edit -" }</h1>
+                <h1>{"- "} { article_type.clone() } {" Edit -" }</h1>
                 <div class="support-tools">
                     <div class="image-upload">
                         <label>
@@ -479,21 +479,39 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
                             </div>
                         </label>
 
-                        <h3>{"Tags"}</h3>
-                        <label for="tag-select">
-                            <div class="add-select">
-                                <input type="text" ref={new_tag_ref}/>
-                                <button onclick={add_tag}>{"+"}</button>
-                            </div>
-                            <div class="choose-select">
-                                <div class="selecter">
-                                    <select name="tag" ref={select_tag_ref} size="3" multiple={true} id="tag-select">
-                                        {pulldown_tag_option_vnode}
-                                    </select>
+                        if article_type == "works" {
+                            <h3 class="works-edit">{"Tags"}</h3>
+                            <label for="tag-select" class="works-edit">
+                                <div class="add-select">
+                                    <input type="text" ref={new_tag_ref}/>
+                                    <button onclick={add_tag}>{"+"}</button>
                                 </div>
-                                <button onclick={del_tag}>{"-"}</button>
-                            </div>
-                        </label>
+                                <div class="choose-select">
+                                    <div class="selecter">
+                                        <select name="tag" ref={select_tag_ref} size="3" multiple={true} id="tag-select">
+                                            {pulldown_tag_option_vnode}
+                                        </select>
+                                    </div>
+                                    <button onclick={del_tag}>{"-"}</button>
+                                </div>
+                            </label>
+                        } else {
+                            <h3>{"Tags"}</h3>
+                            <label for="tag-select">
+                                <div class="add-select">
+                                    <input type="text" ref={new_tag_ref}/>
+                                    <button onclick={add_tag}>{"+"}</button>
+                                </div>
+                                <div class="choose-select">
+                                    <div class="selecter">
+                                        <select name="tag" ref={select_tag_ref} size="3" multiple={true} id="tag-select">
+                                            {pulldown_tag_option_vnode}
+                                        </select>
+                                    </div>
+                                    <button onclick={del_tag}>{"-"}</button>
+                                </div>
+                            </label>
+                        }
                         <h3>{"Title"}</h3>
                         <textarea class="title-area" ref={title_ref} oninput={oninput_title} value={title.to_string()} />
                     </div>
