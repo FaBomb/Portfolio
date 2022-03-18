@@ -134,23 +134,38 @@ export const set_tag = async(tag: string) => {
 }
 
 export const del_content =async (collect: string, id: string) => {
+    const msg = "コンテンツを削除します。よろしいですか？";
+    const value = window.confirm(msg);
     const delRef = doc(store, collect, id);
-    await deleteDoc(delRef).then(() => {
-        alert("Successful Article delete");
-    }).catch((error) => {
-        console.error("del_content is error", error);
-    })
+
+    if (value) {
+        await getDoc(delRef).then((snapshot) => {
+            const data = snapshot.data();
+            if (data) {
+                data.article.images.forEach(async (image: string) => {
+                    if (!image.match(/no-img.png/)) {
+                        await del_from_url(image);
+                    }
+                })
+            };
+        })
+        await deleteDoc(delRef).then(() => {
+            alert("Successful Article delete");
+        }).catch((error) => {
+            console.error("del_content is error", error);
+        })
+    }
 }
 export const del_category =async (category: string) => {
     await deleteDoc(doc(store, "category", category)).then(() => {
-        console.log(category+" deleted")
+        alert(category+" deleted");
     }).catch((error) => {
         console.error("del_category is error", error);
     })
 }
 export const del_tag =async (tag: string) => {
     await deleteDoc(doc(store, "tag", tag)).then(() => {
-        console.log(tag+" deleted")
+        alert(tag+" deleted");
     }).catch((error) => {
         console.error("del_tag is error", error);
     })

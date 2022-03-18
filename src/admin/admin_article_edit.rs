@@ -1,5 +1,5 @@
 use crate::compornents::{footer::Footer, header::Header};
-use crate::routing::AdminRoute;
+use crate::routing::{AdminRoute, BlogRoute, WorkRoute};
 use js_bridge::{
     del_category, del_tag, fetch_all_article_content_from_id, fetch_categories, fetch_tags,
     is_signed_in, set_category, set_content, set_tag, update_content, upload,
@@ -95,8 +95,7 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
         Some(path) => path,
         None => "",
     };
-    let mut article_type = id;
-    let id = props.id.clone();
+    let mut article_type = id.clone();
     if current_path == "admin_work" {
         article_type = "works".to_string();
     } else if current_path == "admin_blog" {
@@ -139,7 +138,7 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
         let init_tags = init_tags.clone();
         let thumbnail_state = thumbnail.clone();
         let text = text.clone();
-
+        let history = history.clone();
         let article_type = article_type.clone();
         let is_signed = is_signed.clone();
         let categories = categories.clone();
@@ -319,7 +318,9 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
         let thumbnail = thumbnail.clone();
         let text = text.clone();
         let thumbnail = thumbnail.clone();
+        let history = history.clone();
         move |_| {
+            let history = history.clone();
             let article_type = article_type.clone();
             let id = id.clone();
             let title = title.clone();
@@ -382,7 +383,16 @@ pub fn admin_article_edit(props: &RenderedAtProps) -> Html {
                         let serialized_article = serde_json::to_string(&ariticle).unwrap();
 
                         if id == "new" {
-                            set_content(article_type, serialized_article).await;
+                            set_content(article_type.clone(), serialized_article).await;
+                            if article_type == "works" {
+                                history.push(WorkRoute::Work {
+                                    page: "1".to_string(),
+                                })
+                            } else if article_type == "blog" {
+                                history.push(BlogRoute::Blog {
+                                    page: "1".to_string(),
+                                })
+                            }
                         } else {
                             update_content(article_type, serialized_article, id).await;
                         }
