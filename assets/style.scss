@@ -648,6 +648,19 @@ footer {
         table {
             width: 100%;
         }
+        ul {
+            li:before {
+                content: "";
+                width: .5rem;
+                height: .5rem;
+                display: inline-block;
+                background-color: $light_color;
+                border-radius: 50%;
+                position:  relative;
+                top: -.1rem;
+                margin-right: .5rem;    
+            }
+        }
     }
 }
 .article-edit {
@@ -923,6 +936,9 @@ footer {
 }
 
 @media screen and (max-width: 767px) {
+    body {
+        font-family: Montserrat, "游ゴシック", "ヒラギノ角ゴ Pro W3", "メイリオ", sans-serif;
+    }
     .tag-box{
         width: 90%;
     }
