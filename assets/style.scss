@@ -1037,7 +1037,10 @@ footer {
             margin-left: auto;
         }
         .about {
-            width: 100%;
+            width: 90%;
+            a i {
+                font-size: 4rem;
+            }
         }
     }
     .article {
