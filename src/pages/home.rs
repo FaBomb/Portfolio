@@ -39,8 +39,10 @@ pub fn home() -> Html {
                     <h3>{ "=" }</h3>
                 </div>
                 <div class="ex-detail">
-                    <p>{"Technology will accompany people's lives and coexist with them."}</p>
-                    <p>{"I will create products that have never been created before and improve people's lives little by little."}</p>
+                    <p>
+                        {"This website is FaBomb's portfolio site. "}<br/>
+                        {"I will keep a record of my work and learning."}
+                    </p>
                 </div>
             </div>
             <div class="home-work">
@@ -50,7 +52,7 @@ pub fn home() -> Html {
                     <Card current_page={1} limit_num={4} article_type={"works"}
                     is_signed={false} query_content={"".to_string()} />
                 </div>
-                <a onclick={go_work} class="detail">{"- more -"}</a>
+                <a onclick={go_work} class="detail">{"more"}</a>
             </div>
             <div class="home-blog">
                 <h2><a onclick={go_blog.clone()}>{ "- Blog -" }</a></h2>
@@ -59,7 +61,7 @@ pub fn home() -> Html {
                     <Card current_page={1} limit_num={4} article_type={"blog"}
                     is_signed={false} query_content={"".to_string()}/>
                 </div>
-                <a onclick={go_blog} class="detail">{"- more -"}</a>
+                <a onclick={go_blog} class="detail">{"more"}</a>
             </div>
             <div class="home-profile">
                 <h2><a onclick={go_profile.clone()}>{ "- Profile -" }</a></h2>
@@ -75,7 +77,7 @@ pub fn home() -> Html {
                         <dd>{"Web Engineer"}</dd>
                     </dl>
                 </div>
-                <a onclick={go_profile} class="detail">{"- more -"}</a>
+                <a onclick={go_profile} class="detail">{"more"}</a>
             </div>
             <Footer/>
         </>
