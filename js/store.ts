@@ -20,9 +20,16 @@ const adjust_storage = async(used_urls: Array<string>) => {
         })
     }
     const del_urls = await fetch_unused();
-    del_urls.forEach(unused_url => {
-        del_from_url(unused_url);
-    })
+
+    if (del_urls.length !== 0) {
+        const msg = del_urls.length+"個のファイルを削除します。よろしいですか？";
+        const value = window.confirm(msg);
+        if (value) {
+            del_urls.forEach(async unused_url => {
+                await del_from_url(unused_url);
+            })
+        }
+    }
 }
 
 export const set_content = async(collect: string, article: string) => {
@@ -32,9 +39,10 @@ export const set_content = async(collect: string, article: string) => {
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
     }
-    await addDoc(collection(store, collect), docData).then(() => {
-        adjust_storage(json_article.images);
-        alert("Successful Posting");
+    await addDoc(collection(store, collect), docData).then(async () => {
+        await adjust_storage(json_article.images).then(() => {
+            alert("Successful Posting");
+        });
     }).catch((error) => {
         console.error("set_content is error", error);
     });
@@ -56,9 +64,10 @@ export const update_content = async(collect: string, article: string, id: string
             })
         };
     })
-    await updateDoc(updateRef, docData).then(() => {
-        adjust_storage(json_article.images);
-        alert("Successful Update");
+    await updateDoc(updateRef, docData).then(async () => {
+        await adjust_storage(json_article.images).then(() => {
+            alert("Successful Update");
+        });
     }).catch((error) => {
         console.error("update_content is error", error);
     });
