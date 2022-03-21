@@ -365,10 +365,9 @@ pub fn card(props: &RenderedAtProps) -> Html {
     if props.current_page != *current_page || *rerender {
         change_article("");
     }
-    let new_card_vnode: Vec<VNode> = card_vnode.to_vec();
     html! {
         <>
-            {new_card_vnode}
+            {card_vnode.to_vec()}
         </>
     }
 }

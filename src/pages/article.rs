@@ -3,7 +3,6 @@ use crate::compornents::{
 };
 use js_bridge::{fetch_article_size, fetch_query_size, is_signed_in};
 use serde::{Deserialize, Serialize};
-
 use wasm_bindgen_futures::spawn_local;
 use yew::{function_component, html, use_effect_with_deps, use_state, Properties};
 use yew_router::prelude::*;
@@ -36,6 +35,7 @@ pub fn article(props: &RenderedAtProps) -> Html {
     let mut query: String = history.location().search();
     let mut query_name: String = "".to_string();
     let mut query_content: String = "".to_string();
+
     if query.len() > 1 {
         query.remove(0);
         let query_vec: Vec<&str> = query.split('=').collect();
@@ -96,6 +96,7 @@ pub fn article(props: &RenderedAtProps) -> Html {
         );
     }
     let article_type = &*article_type.clone();
+
     html! {
         <>
             <Header/>

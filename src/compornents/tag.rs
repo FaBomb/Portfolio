@@ -1,9 +1,11 @@
+use crate::routing::BlogRoute;
 use js_bridge::fetch_tags;
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
 use wasm_bindgen_futures::spawn_local;
 use yew::virtual_dom::VNode;
 use yew::{function_component, html, use_effect_with_deps, use_state};
+use yew_router::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Tag {
@@ -17,28 +19,61 @@ struct Tags {
 
 #[function_component(TagCompornent)]
 pub fn tag() -> Html {
-    let init_tags = Tags { tags: vec![] };
-    let tags = use_state(|| init_tags);
+    let init_tag_vnode: Vec<VNode> = Vec::new();
+    let tag_vnode = use_state(|| init_tag_vnode);
+    let history = use_history().unwrap();
 
     {
-        let tags = tags.clone();
+        let tag_vnode = tag_vnode.clone();
+        let history = history.clone();
         use_effect_with_deps(
             move |_| {
                 spawn_local(async move {
                     let tags_value = fetch_tags().await.as_string();
+                    let mut tag_vnode_box: Vec<VNode> = Vec::new();
                     match tags_value {
                         Some(tags_val) => {
                             let tags_result: Result<Tags> = serde_json::from_str(&tags_val);
-                            let tags_result = match tags_result {
-                                Ok(tags) => tags,
-                                Err(_) => Tags { tags: vec![] },
+                            match tags_result {
+                                Ok(tags) => {
+                                    for tag in tags.tags {
+                                        let go_tag = {
+                                            let tag = tag.clone();
+                                            let history = history.clone();
+                                            move |_| {
+                                                let query = Tag {
+                                                    tag: tag.to_string(),
+                                                };
+                                                history.push(BlogRoute::Blog {
+                                                    page: "2".to_string(),
+                                                });
+                                                history
+                                                    .push_with_query(
+                                                        BlogRoute::Blog {
+                                                            page: "1".to_string(),
+                                                        },
+                                                        query,
+                                                    )
+                                                    .unwrap();
+                                            }
+                                        };
+                                        let vnode = html! {
+                                            <a onclick={go_tag}>{tag.clone()}</a>
+                                        };
+                                        tag_vnode_box.push(vnode);
+                                    }
+                                }
+                                Err(_) => {
+                                    log::info!("{:?}", "fetch_tags Err");
+                                }
                             };
-                            tags.set(tags_result);
                         }
                         None => {
                             log::info!("{:?}", "fetch_tags null");
                         }
-                    }
+                    };
+
+                    tag_vnode.set(tag_vnode_box);
                 });
                 || ()
             },
@@ -46,19 +81,9 @@ pub fn tag() -> Html {
         );
     }
 
-    let mut tag_vnodes: Vec<VNode> = Vec::new();
-    let tags = &*tags.clone();
-    let tags_vec = &tags.tags;
-    for tag in tags_vec {
-        let tag_vnode = html! {
-            <a href={format!("/blog/1?tag={}",tag.clone())}>{tag.clone()}</a>
-        };
-        tag_vnodes.push(tag_vnode);
-    }
-
     html! {
         <>
-            {tag_vnodes}
+            {tag_vnode.to_vec()}
         </>
     }
 }
