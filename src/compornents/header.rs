@@ -14,6 +14,9 @@ pub fn header() -> Html {
     let history = use_history().unwrap();
     let go_blog = Callback::from(move |_| {
         history.push(BlogRoute::Blog {
+            page: "2".to_string(),
+        });
+        history.push(BlogRoute::Blog {
             page: "1".to_string(),
         })
     });
